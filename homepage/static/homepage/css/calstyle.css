@@ -1,0 +1,610 @@
+
+
+
+/*
+Title: CSS-Only Calendar Layout [CSS Grid]
+Author: Álvaro
+Date: May 9, 2022
+URL: https://codepen.io/alvarotrigo/pen/KKQzvdr
+*/
+
+
+
+:root {
+  --numDays: 5;
+  --numHours: 60;
+  --numTimelines: 63;
+  --timeHeight: 20px;
+  --calBgColor: #fff1f8;
+  --eventBorderColor: #7d998a;
+  --eventColor1: #ffd6d1;
+  --eventColor2: #fafaa3;
+  --eventColor3: #e2f8ff;
+  --eventColor4: #d1ffe6;
+  --gray: #708090;
+}
+
+.calendar {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: auto 1fr;
+  margin-bottom: 2rem
+}
+
+.timeline {
+  display: grid;
+  grid-template-rows: repeat(var(--numTimelines), var(--timeHeight));
+  width: auto;
+
+}
+
+.days {
+  display: grid;
+  grid-column: 2;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  position:relative;
+}
+
+.events {
+  display: grid;
+  grid-template-rows: repeat(var(--numHours), var(--timeHeight));
+  border-radius: 5px;
+  background: var(--calBgColor);
+  margin-top: 11px;
+}
+
+p.title {
+  font-weight: 500;
+  margin:0;
+  font-size: 0.9em;
+}
+
+p.others {
+    font-weight: 400;
+    margin:0;
+    font-size:0.8em;
+}
+
+.event {
+  border:1px solid var(--eventBorderColor);
+  //border-radius: 5px;
+  padding: 0.01rem;
+  margin: 0 0.1rem;
+  text-align: center;
+  position: relative;
+}
+
+.delete {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin-top: 0px;
+}
+
+.space, .date {
+  height: 60px
+}
+
+.white {
+height: 8px;
+}
+
+// Global / Etc
+body {
+  font-family: system-ui, sans-serif;
+}
+
+.light-pink {
+  background: var(--eventColor1);
+}
+
+.light-yellow {
+  background: var(--eventColor2);
+}
+
+.light-cyan {
+  background: var(--eventColor3);
+}
+
+.green {
+  background: var(--eventColor4);
+}
+
+.date {
+  display: flex;
+  gap: 1em;
+}
+
+.date-day {
+  display: inline;
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.date-day-transparent {
+  display: inline;
+  font-size: 3rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.detail-text {
+    color: var(--gray);
+}
+
+.bi-trash:hover {
+}
+
+.deletion-warning-text {
+    color: black;
+}
+
+.start-0700am {
+  grid-row-start:1;
+}
+
+.start-0715am {
+  grid-row-start:2;
+}
+
+.start-0730am {
+  grid-row-start:3;
+}
+
+.start-0745am {
+  grid-row-start:4;
+}
+
+.start-0800am {
+  grid-row-start:5;
+}
+
+.start-0815am {
+  grid-row-start:6;
+}
+
+.start-0830am {
+  grid-row-start:7;
+}
+
+.start-0845am {
+  grid-row-start:8;
+}
+
+.start-0900am {
+  grid-row-start:9;
+}
+
+.start-0915am {
+  grid-row-start:10;
+}
+
+.start-0930am {
+  grid-row-start:11;
+}
+
+.start-0945am {
+  grid-row-start:12;
+}
+
+.start-1000am {
+  grid-row-start:13;
+}
+
+.start-1015am {
+  grid-row-start:14;
+}
+
+.start-1030am {
+  grid-row-start:15;
+}
+
+.start-1045am {
+  grid-row-start:16;
+}
+
+.start-1100am {
+  grid-row-start:17;
+}
+
+.start-1115am {
+  grid-row-start:18;
+}
+
+.start-1130am {
+  grid-row-start:19;
+}
+
+.start-1145am {
+  grid-row-start:20;
+}
+
+.start-1200pm {
+  grid-row-start: 21;
+}
+
+.start-1215pm {
+  grid-row-start: 22;
+}
+
+.start-1230pm {
+  grid-row-start: 23;
+}
+
+.start-1245pm {
+  grid-row-start: 24;
+}
+
+.start-100pm {
+  grid-row-start: 25;
+}
+
+.start-115pm {
+  grid-row-start: 26;
+}
+
+.start-130pm {
+  grid-row-start: 27;
+}
+
+.start-145pm {
+  grid-row-start: 28;
+}
+
+.start-200pm {
+  grid-row-start: 29;
+}
+
+.start-215pm {
+  grid-row-start: 30;
+}
+
+.start-230pm {
+  grid-row-start: 31;
+}
+
+.start-245pm {
+  grid-row-start: 32;
+}
+
+.start-300pm {
+  grid-row-start: 33;
+}
+
+.start-315pm {
+  grid-row-start: 34;
+}
+
+.start-330pm {
+  grid-row-start: 35;
+}
+
+.start-345pm {
+  grid-row-start: 36;
+}
+
+.start-400pm {
+  grid-row-start: 37;
+}
+
+.start-415pm {
+  grid-row-start: 38;
+}
+
+.start-430pm {
+  grid-row-start: 39;
+}
+
+.start-445pm {
+  grid-row-start: 40;
+}
+
+.start-500pm {
+  grid-row-start: 41;
+}
+
+.start-515pm {
+  grid-row-start: 42;
+}
+
+.start-530pm {
+  grid-row-start: 43;
+}
+
+.start-545pm {
+  grid-row-start: 44;
+}
+
+.start-600pm {
+  grid-row-start: 45;
+}
+
+.start-615pm {
+  grid-row-start: 46;
+}
+
+.start-630pm {
+  grid-row-start: 47;
+}
+
+.start-645pm {
+  grid-row-start: 48;
+}
+
+.start-700pm {
+  grid-row-start: 49;
+}
+
+.start-715pm {
+  grid-row-start: 50;
+}
+
+.start-730pm {
+  grid-row-start: 51;
+}
+
+.start-745pm {
+  grid-row-start: 52;
+}
+
+.start-800pm {
+  grid-row-start: 53;
+}
+
+.start-815pm {
+  grid-row-start: 54;
+}
+
+.start-830pm {
+  grid-row-start: 55;
+}
+
+.start-845pm {
+  grid-row-start: 56;
+}
+
+.start-900pm {
+  grid-row-start: 57;
+}
+
+.start-915pm {
+  grid-row-start: 58;
+}
+
+.start-930pm {
+  grid-row-start: 59;
+}
+
+.end-0745am {
+  grid-row-end:4;
+}
+
+.end-0800am {
+  grid-row-end:5;
+}
+
+.end-0815am {
+  grid-row-end:6;
+}
+
+.end-0830am {
+  grid-row-end:7;
+}
+
+.end-0845am {
+  grid-row-end:8;
+}
+
+.end-0900am {
+  grid-row-end:9;
+}
+
+.end-0915am {
+  grid-row-end:10;
+}
+
+.end-0930am {
+  grid-row-end:11;
+}
+
+.end-0945am {
+  grid-row-end:12;
+}
+
+.end-1000am {
+  grid-row-end:13;
+}
+
+.end-1015am {
+  grid-row-end:14;
+}
+
+.end-1030am {
+  grid-row-end:15;
+}
+
+.end-1045am {
+  grid-row-end:16;
+}
+
+.end-1100am {
+  grid-row-end:17;
+}
+
+.end-1115am {
+  grid-row-end:18;
+}
+
+.end-1130am {
+  grid-row-end:19;
+}
+
+.end-1145am {
+  grid-row-end:20;
+}
+
+.end-1200pm {
+  grid-row-end: 21;
+}
+
+.end-1215pm {
+  grid-row-end: 22;
+}
+
+.end-1230pm {
+  grid-row-end: 23;
+}
+
+.end-1245pm {
+  grid-row-end: 24;
+}
+
+.end-100pm {
+  grid-row-end: 25;
+}
+
+.end-115pm {
+  grid-row-end: 26;
+}
+
+.end-130pm {
+  grid-row-end: 27;
+}
+
+.end-145pm {
+  grid-row-end: 28;
+}
+
+.end-200pm {
+  grid-row-end: 29;
+}
+
+.end-215pm {
+  grid-row-end: 30;
+}
+
+.end-230pm {
+  grid-row-end: 31;
+}
+
+.end-245pm {
+  grid-row-end: 32;
+}
+
+.end-300pm {
+  grid-row-end: 33;
+}
+
+.end-315pm {
+  grid-row-end: 34;
+}
+
+.end-330pm {
+  grid-row-end: 35;
+}
+
+.end-345pm {
+  grid-row-end: 36;
+}
+
+.end-400pm {
+  grid-row-end: 37;
+}
+
+.end-415pm {
+  grid-row-end: 38;
+}
+
+.end-430pm {
+  grid-row-end: 39;
+}
+
+.end-445pm {
+  grid-row-end: 40;
+}
+
+.end-500pm {
+  grid-row-end: 41;
+}
+
+.end-515pm {
+  grid-row-end: 42;
+}
+
+.end-530pm {
+  grid-row-end: 43;
+}
+
+.end-545pm {
+  grid-row-end: 44;
+}
+
+.end-600pm {
+  grid-row-end: 45;
+}
+
+.end-615pm {
+  grid-row-end: 46;
+}
+
+.end-630pm {
+  grid-row-end: 47;
+}
+
+.end-645pm {
+  grid-row-end: 48;
+}
+
+.end-700pm {
+  grid-row-end: 49;
+}
+
+.end-715pm {
+  grid-row-end: 50;
+}
+
+.end-730pm {
+  grid-row-end: 51;
+}
+
+.end-745pm {
+  grid-row-end: 52;
+}
+
+.end-800pm {
+  grid-row-end: 53;
+}
+
+.end-815pm {
+  grid-row-end: 54;
+}
+
+.end-830pm {
+  grid-row-end: 55;
+}
+
+.end-845pm {
+  grid-row-end: 56;
+}
+
+.end-900pm {
+  grid-row-end: 57;
+}
+
+.end-915pm {
+  grid-row-end: 58;
+}
+
+.end-930pm {
+  grid-row-end: 59;
+}
+
+.end-945pm {
+  grid-row-end: 60;
+}
+
+.end-1000pm {
+  grid-row-end: 61;
+}
+

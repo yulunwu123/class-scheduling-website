@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock%}
+{% block content %}
+{% load static %}
+
+<div class="d-flex justify-content-md-center align-items-center">
+    <div class="dashboard">
+        <div class="profile-pic">
+            <img src="{% static 'homepage/catprofile.png' %}" alt="catprofile" border="0" width="175" height="175"/></a>
+        </div>
+        <div class="profile-info">
+            <h2><u><b>Dashboard</b></u></h2>
+            <h2><b>Welcome, {{user.first_name}} {{user.last_name}}!</b></h2>
+            <a href="{% url 'homepage:edit' %}" class="btn" role="button" style="margin-left:0px">
+                    <button class="button">Edit Profile</button></a>
+            <a href="{% url 'homepage:friendslist' %}" class="btn" role="button">
+                <button class="button">My Friends</button></a>
+            <a href="{% url 'homepage:password_change' %}" class="btn" role="button">
+                <button class="button">Change Password</button></a>
+            <a href="{% url 'homepage:schedule_builder' user.id %}" class="btn" role="button">
+                <button class="button">My Class Schedule</button></a>
+        </div>
+    </div>
+</div>
+
+
+<br><br>
+
+<h5><b><u><div>Course List: </div></u></b></h5>
+<!-- link: https://html5-tutorial.net/tables/changing-column-width/ -->
+  <table class="table table-bordered table-hover">
+
+<!--  <col style="width:35%">-->
+<!--  <col style="width:17%">-->
+<!--  <col style="width:5%">-->
+<!--  <col style="width:18%">-->
+<!--  <col style="width:25%">-->
+  <thead>
+  <tr>
+    <th><u>Class Title</u></th>
+    <th><u>Course Number</u></th>
+    <th><u>Type</u></th>
+    <th><u>Instructor</u></th>
+    <th><u>Time</u></th>
+      <th><u>Location</u></th>
+  </tr>
+  </thead>
+  <tbody>
+
+{% if courselist != None %}
+        {%for i in courselist_json%}
+        <tr>
+            <th>
+                {{i.course_title}}
+            </th>
+            <td>
+                {{i.course_acronym}} ({{i.class_num}})
+            </td>
+            <td>
+                {{i.course_type}}
+            </td>
+            <td>
+                {{i.course_instructor}}
+            </td>
+
+            {% if not i.more_than_one_meeting %}
+            <td>
+                {{i.course_days}} {{i.course_time}}
+            </td>
+            <td>
+                {{i.location}}
+            </td>
+            {% else %}
+            <td>
+                {% for meeting in i.meetings %}
+                {{meeting}} <br>
+                {% endfor %}
+            </td>
+            <td>
+                {% for location in i.locations %}
+                {{location}} <br>
+                {% endfor %}
+            </td>
+            {% endif %}
+        </tr>
+        {%endfor%}
+{% endif %}
+</tbody>
+</table>
+
+<div>
+    <a href="{% url 'homepage:schedule_builder' user.id%}" class="btn" role="button"> <button style="background-color: #87CEEB; padding: 10px; font-size: 16px; margin: 4px 2px; border-radius: 10px;">Calendar View of Courses</button></a>
+</div>
+
+<div class = "spacefill"></div>
+
+<style>
+.dashboard { /*https://www.webucator.com/article/how-to-create-boxes-with-rounded-corners-in-css/*/
+  border-radius: 25px;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  background: #FFB6C1;
+  overflow: hidden;
+  width: 1100px;
+  margin: 20px;
+  max-width: 100%;
+}
+
+body{
+  margin-align:  center;
+}
+
+.profile-pic {
+	padding: 20px;
+}
+
+.profile-info {
+	padding: 30px;
+	position: relative;
+	width: 100%;
+}
+
+.button {
+    background-color: #87CEEB;
+    padding: 7px;
+    font-size: 16px;
+    border-radius: 10px;
+    position: relative;
+    left:-13px;
+}
+</style>
+
+{% endblock %}
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: Changing Column Width
+*  Author: HTML5 Tutorial
+*  URL: https://html5-tutorial.net/tables/changing-column-width/
+*  NOTES: help formatting table columns
+*
+***************************************************************************************/-->
+
+
+<!--<center>-->
+<!--<div id="dashboard">-->
+<!--  <h2>-->
+<!--    <table class="table">-->
+<!--      <thead>-->
+<!--        <center> &lt;!&ndash; https://kb.iu.edu/d/abai &ndash;&gt; &lt;!&ndash; https://www.tutorialspoint.com/css/css_positioning.htm &ndash;&gt;-->
+<!--            <th scope="col"> <img src="{% static 'homepage/catprofile.png' %}" alt="catprofile" border="0" width="175" height="175" style="margin-bottom: 35px"/></a> </th>-->
+<!--            <th scope="col"><div style="margin-top: -200px; margin-left: -601px;"> <u>Dashboard</u></div></th>-->
+<!--            <th scope="col"><div style="margin-top: -150px; margin-left: -675px; "> Welcome, {{user.first_name}} {{user.last_name}}! </div>-->
+<!--            <th scope="col"><div style="margin-top: -100px; margin-left: -760px;">-->
+<!--                <a href="{% url 'homepage:edit' %}" class="btn" role="button">-->
+<!--                    <button style="background-color: #87CEEB; padding: 7px; font-size: 16px; margin: 4px 2px; border-radius: 10px;">Edit Profile</button></a>-->
+<!--                <a href="{% url 'homepage:friendslist' %}" class="btn" role="button">-->
+<!--                    <button style="background-color: #87CEEB; padding: 7px; font-size: 16px; margin: 4px 2px; border-radius: 10px;">My Friends</button></a>-->
+<!--                <a href="{% url 'homepage:password_change' %}" class="btn" role="button">-->
+<!--                    <button style="background-color: #87CEEB; padding: 7px; font-size: 16px; margin: 4px 2px; border-radius: 10px;">Change Password</button></a>-->
+<!--                            </div>-->
+<!--            </th>-->
+<!--        </center>-->
+<!--      </thead>-->
+<!--    </table>-->
+<!--</center>-->
+<!--   </h2>-->
+<!--</div>-->
+<!--</center>-->

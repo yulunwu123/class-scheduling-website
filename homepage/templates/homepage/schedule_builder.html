@@ -1,0 +1,71 @@
+{% extends 'calbase.html' %}
+{% block title %} Schedule {% endblock %}
+{% load static %}
+{% block extraJavascript %}
+<script src= "{% static 'homepage/javascript/detail_class_info.js' %}"></script>
+{% endblock%}
+{% block content %}
+{{ calendar }}
+
+
+<!-- https://www.quackit.com/html/codes/comment_box_colors.cfm colored comment boxes -->
+<!-- comment help: https://djangocentral.com/creating-comments-system-with-django/ -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 card mb-4  mt-3 left top">
+      <div class="card-body">
+        <h1> Comments </h1>
+      </div>
+    </div>
+
+    <div class="col-md-8 card mb-4  mt-3 ">
+      <div class="card-body">
+        <!-- comments -->
+        <h2>{{ comments.count }} comments</h2>
+        {% for comment in comments %}
+        <div class="comments" style="padding: 10px;">
+          <p class="font-weight-bold">
+            {{ comment.name }}
+            <span class=" text-muted font-weight-normal">
+              {{ comment.created_on }}
+            </span>
+          </p>
+          {{ comment.body | linebreaks }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-md-8 card mb-4  mt-3 ">
+      <div class="card-body">
+        <h3>Leave a comment</h3>
+        <form method="post" style="margin-top: 1.3em;">
+          {{ comment_form.as_p }}
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: How can I make a comment box in HTML
+*  Author: Quora: Jyotish Kumar
+*  URL: https://www.quora.com/How-can-I-make-a-comment-box-in-HTML
+*  NOTES: Comment Box
+*
+*  Title: Comment Box Colors
+*  Author: Quackit Team
+*  URL: https://www.quackit.com/html/codes/comment_box_colors.cfm
+*  NOTES: colored color boxes
+*
+*  Title: Creating Comments System With Django
+*  Author: DjangoCentral Team
+*  URL: https://djangocentral.com/creating-comments-system-with-django/
+*  NOTES: Comment help
+*
+***************************************************************************************/-->

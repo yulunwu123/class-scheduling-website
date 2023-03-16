@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extraJavascript %}
+<script src="{% static 'homepage/javascript/detail_class_info.js' %}"></script>
+{% endblock%}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="detail" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#FF7F50">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">CS 1110-100 Laboratory 15150</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Introduction to Programming</h6>
+                <div class="detail-text">Lecture | 3 units</div>
+                <div class="detail-text">Prof</div>
+                <div class="detail-text">TuTh 5:00pm - 6:15pm @ Olsson Hall 011</div>
+                <div class="detail-text">Enrolled: 85 | Capacity: 85 | Wait List: 5/5</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2nd Modal -->
+<div class="modal fade" id="delete" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#FF7F50">
+                <h1 class="modal-title fs-5">Delete</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="deletion-warning-text">Are you sure you want to delete all sections of this class from your schedule?</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="delete_event/{event.id}" class="btn btn-danger" role="button">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="calendar">
+    <!--    <div class="white"></div>-->
+    <!--    <div class="white"></div>-->
+    <div class="timeline">
+        <div>-----</div>
+        <div>-----</div>
+        <div>-----</div>
+        <div>7 am----</div>
+        <div></div>
+        <div>7:30 AM</div>
+        <div></div>
+        <div>8 AM</div>
+        <div></div>
+        <div>8:30 AM</div>
+        <div></div>
+        <div>9 AM</div>
+        <div></div>
+        <div>9:30 AM</div>
+        <div></div>
+        <div>10 AM</div>
+        <div></div>
+        <div>10:30 AM</div>
+        <div></div>
+        <div>11 AM</div>
+        <div></div>
+        <div>11:30 AM</div>
+        <div></div>
+        <div>12 PM</div>
+        <div></div>
+        <div>12:30 PM</div>
+        <div></div>
+        <div>1 PM</div>
+        <div></div>
+        <div>1:30 PM</div>
+        <div></div>
+        <div>2 PM</div>
+        <div></div>
+        <div>2:30 PM</div>
+        <div></div>
+        <div>3 PM</div>
+        <div></div>
+        <div>3:30 PM</div>
+        <div></div>
+        <div>4 PM</div>
+        <div></div>
+        <div>4:30 PM</div>
+        <div></div>
+        <div>5 PM</div>
+        <div></div>
+        <div>5:30 PM</div>
+        <div></div>
+        <div>6 PM</div>
+        <div></div>
+        <div>6:30 PM</div>
+        <div></div>
+        <div>7 PM</div>
+        <div></div>
+        <div>7:30 PM</div>
+        <div></div>
+        <div>8 PM</div>
+        <div></div>
+        <div>8:30 PM</div>
+        <div></div>
+        <div>9 PM</div>
+        <div></div>
+        <div>9:30 PM</div>
+        <div></div>
+        <div>10 PM</div>
+    </div>
+
+    <div class="days">
+        <div class="day Mo">
+
+            <div class="date">
+                <p class="date-day">Mon</p>
+            </div>
+
+            <div class="events">
+
+                <div class="event start-515pm end-930pm green" id="exampleClass" data-bs-toggle="modal"
+                     data-bs-target="#detail">
+                    <p class="title">Class Title</p>
+                    <p class="others">Location</p>
+                    <p class="others">Time</p>
+                    <div class="delete">
+                        <a class="btn btn-sm" data-bs-toggle="modal"
+                           data-bs-target="#delete"
+                           role="button">
+                            <i class="bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="day Tu">
+            <div class="date">
+                <p class="date-day">Tues</p>
+            </div>
+            <div class="events">
+                <div class="event start-1000am end-1200pm light-cyan" id="exampleClass-2" data-bs-toggle="modal"
+                     data-bs-target="#detail">
+                    <p class="title">Corporate Finance</p>
+                    <p class="title">10 AM - 12 PM</p>
+                </div>
+                <div class="event start-100pm end-400pm light-cyan" id="exampleClass-3" data-bs-toggle="modal"
+                     data-bs-target="#detail">
+                    <p class="title">CS 1110</p>
+                    <p class="title">Entertainment Law</p>
+                    <p class="title">1PM - 4PM</p>
+                </div>
+            </div>
+        </div>
+        <div class="day We">
+            <div class="date">
+                <p class="date-day">Wed</p>
+            </div>
+            <div class="events">
+                <div class="event start-1100am end-1200pm light-yellow">
+                    <p class="title">Writing Seminar</p>
+                    <p class="title">11 AM - 12 PM</p>
+                </div>
+                <div class="event start-200pm end-500pm green">
+                    <p class="title">green Regulation</p>
+                    <p class="title">2 PM - 5 PM</p>
+                </div>
+            </div>
+        </div>
+        <div class="day Th">
+            <div class="date">
+                <p class="date-day">Thurs</p>
+            </div>
+            <div class="events">
+                <div class="event start-1000am end-1200pm light-pink">
+                    <p class="title">Corporate Finance</p>
+                    <p class="title">10 AM - 12 PM</p>
+                </div>
+                <div class="event start-100pm end-145pm light-pink">
+                    <p class="title">Entertainment Law</p>
+                    <p class="title">1PM - 1:50PM</p>
+                </div>
+
+                <div class="event start-200pm end-245pm green">
+                    <p class="title">Cover?</p>
+                    <p class="title">2PM - 2:50PM</p>
+                    <div class="delete">
+                        <a class="btn btn-sm" data-bs-toggle="modal"
+                           data-bs-target="#detail2"
+                           role="button">
+                            <i class="bi-trash"></i>
+                        </a>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+        <div class="day Fr">
+            <div class="date">
+                <p class="date-day">Fri</p>
+            </div>
+            <div class="events">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: CSS-Only Calendar Layout [CSS Grid]
+*  Author: Codepen: Álvaro
+*  URL: https://codepen.io/alvarotrigo/pen/KKQzvdr
+*  NOTES: Calendar format
+*
+***************************************************************************************/-->
+

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<!-- CSS styling source -->
+<link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous">
+
+<html lang="en">
+<body>
+{%load static%}
+<link rel="stylesheet" href="{% static 'homepage/style.css' %}">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fira+Sans:wght@500&display=swap"
+          rel="stylesheet">
+</head>
+
+
+<style>
+  caption.caption-top {
+    font-weight: bold;
+  }
+
+</style>
+<style type="text/css">
+#box { /*https://www.webucator.com/article/how-to-create-boxes-with-rounded-corners-in-css/*/
+  border-radius: 25px;
+  background: #FFB6C1;
+  padding: 20px;
+  width: 1109px;
+  height: 225px;
+}
+
+#form {
+  text-align:  center;
+  margin:  0 auto;
+  width:  250 px;
+}
+
+body{
+  margin-align:  center;
+}
+
+bebas{ /*https://codeburst.io/intro-to-google-fonts-for-web-developers-5559b63807d3*/
+font-family: 'Bebas Neue', cursive;
+}
+fire {
+  font-family: 'Fira Sans', sans-serif;
+}
+
+</style>
+
+
+<div id="box">
+    <h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <center> <!-- https://kb.iu.edu/d/abai -->
+                    <!-- https://www.tutorialspoint.com/css/css_positioning.htm -->
+                    <th scope="col"><a href="https://www.virginia.edu/"><img src="{% static 'homepage/UVA-Logo.png' %}"
+                                                                             alt="foxcute" border="0" width="175"
+                                                                             height="100" style="margin-bottom: 35px"/></a>
+                    </th>
+                    <th scope="col">
+                        <div style="top: -15px; margin-left: 50px;">
+                            <h1><font size="+20"><p style="font-family: 'Bebas Neue', cursive;">Hoos' List: UVA Class
+                                Schedules</p></font></h1>
+                            <br></div> <!-- https://www.w3schools.com/tags/tag_font.asp -->
+                        <body>
+                        <form style="margin-left: 65px;" id="form" class="form-inline my-2 my-lg-0" method=POST
+                              action="{% url 'homepage:search' %}">
+                            <!-- https://stackoverflow.com/questions/5560975/how-do-i-move-this-to-the-right -->
+                            {% csrf_token %}
+                            <input style="font-family: 'fire';" class="form-control mr-sm-2" type="search"
+                                   placeholder="Search Department" aria-label="Search" name="searched">
+                            <input style="font-family: 'fire'" class="form-control mr-sm-2" type="search"
+                                   placeholder="Search Number" aria-label="Search" name="searched2">
+                            <button style="font-family: 'fire'" class="btn btn-outline-secondary my-2 my-sm-0"
+                                    type="submit">Search
+                            </button>
+                    <th scope="col"><a href="https://sisuva.admin.virginia.edu/ihprd/signon.html"> <img
+                            src="{% static 'homepage/school.png' %}" alt="foxcute" border="0" width="150" height="150"/>
+                        </form></th>
+</body>
+</tr></thead></table>
+</center>
+</h2>
+</div>
+<!-- cite for search bar: https://getbootstrap.com/docs/4.0/components/navbar/ -->
+<!-- tutorial to add functionality to it: https://www.youtube.com/watch?v=AGtae4L5BbI&ab_channel=Codemy.com -->
+<!-- troubleshooting url, used: https://stackoverflow.com/questions/45724006/django-reverse-for-not-found-is-not-a-valid-view-function-or-pattern-na -->
+
+<br>
+<div class="me-auto" style="max-width: 1200px;">
+    <table class="table table-bordered table-sm table-success">
+        <caption class="caption-top" style="font-family: 'fire'">All Department Mnemonics</caption>
+        {%for i in response%}
+        <tr>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <!-- coloring: https://www.w3schools.com/tags/tag_td.asp -->
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.first.subject}}">{{i.first.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.second.subject}}">{{i.second.subject}}</a>
+                </p>
+            </td>
+            <td style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.third.subject}}">{{i.third.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.fourth.subject}}">{{i.fourth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.fifth.subject}}">{{i.fifth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.sixth.subject}}">{{i.sixth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.seventh.subject}}">{{i.seventh.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.eighth.subject}}">{{i.eighth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.ninth.subject}}">{{i.ninth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.tenth.subject}}">{{i.tenth.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.eleventh.subject}}">{{i.eleventh.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.twelve.subject}}">{{i.twelve.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.thirteen.subject}}">{{i.thirteen.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.fourteen.subject}}">{{i.fourteen.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FE7E9C; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-dark" href="/department/{{i.fifteen.subject}}">{{i.fifteen.subject}}</a>
+                </p>
+            </td>
+            <td class="tcell" style="background-color:#FFB6C1; font-family: 'fire';">
+                <p class="font-weight-bold">
+                    <a class="text-info" href="/department/{{i.sixteen.subject}}">{{i.sixteen.subject}}</a>
+                </p>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>
+
+{% endblock %}
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: HTML <td> Tag
+*  Author: W3schools Team
+*  URL: https://www.w3schools.com/tags/tag_td.asp
+*  NOTES: help with coloring
+*
+*  Title: Navbar
+*  Author: Getbootstrap Team
+*  URL: https://getbootstrap.com/docs/4.0/components/navbar/
+*  NOTES: help using bootstrap search bar
+*
+*  Title: Create A Search Bar - Django Wednesdays #9
+*  Author: Youtube: Codemy.com Team
+*  URL: https://www.youtube.com/watch?v=AGtae4L5BbI&ab_channel=Codemy.com
+*  NOTES: tutorial to add functionality to navbar
+*
+*  Title: ARCHIVED: In HTML, how can I change the size of text on my web page?
+*  Author: University of Indiana Information Technology Services
+*  URL: https://kb.iu.edu/d/abai
+*  NOTES: changing text size
+*
+*  Title: Django - Reverse for '' not found. '' is not a valid view function or pattern name
+*  Author: StackOverflow: Community with Alasdair
+*  URL: https://stackoverflow.com/questions/45724006/django-reverse-for-not-found-is-not-a-valid-view-function-or-pattern-na
+*  NOTES: troubleshooting url
+*
+*  Title: CSS - Positioning
+*  Author: TutorialsPoint Team
+*  URL: https://www.tutorialspoint.com/css/css_positioning.htm
+*  NOTES: help formatting page with buffers
+*
+*  Title: How to Create Boxes with Rounded Corners in CSS
+*  Author: Webucator Team
+*  URL: https://www.webucator.com/article/how-to-create-boxes-with-rounded-corners-in-css/
+*  NOTES: help creating boxes
+*
+*  Title: Google Fonts for Web Developers: Add Custom Fonts to your Website!
+*  Author: Codeburst: Estefania Cassingena Navone
+*  URL: https://codeburst.io/intro-to-google-fonts-for-web-developers-5559b63807d3
+*  NOTES: help adding custom fonts
+*
+***************************************************************************************/-->
+
+

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load homepage_filters %}
+
+{% block content %}
+<h1>Your Courses:</h1>
+
+<html>
+
+    <div class="container-fluid p-5 bg-info text-white text-center">
+        <h1> Course List </h1>
+        {% if course_list %}
+            <ul>
+                {% for course in thought_list %}
+                <li><a> {{classNum.choice_text }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No Courses Added Yet</p>
+        {% endif %}
+    </div>
+
+</html>

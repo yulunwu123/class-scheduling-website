@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load homepage_filters %}
+{% block content %}
+
+<h1>{{department}}</h1>
+
+<div>
+    {% for y in set_of_classes %}
+    <table class="table table-bordered table-hover">
+        <tr>
+            <th class="col-sm-1" colspan='1' style="background: lightblue">{{y}}</th>
+            <th class="CourseName" colspan="14" style="background: CadetBlue">{{all_classes|get_item:y}}</th>
+        </tr>
+        {% for i in modified_dict|get_item:y %}
+        <tr class="table-success">
+            <td class="col-sm-1">
+                    {{i.course_section}}-{{i.component}} {{i.course_number}}
+            </td>
+            <td class="col-sm-1">{{i.enrollment_total}}/{{i.class_capacity}} enrolled</td>
+            <td class="col-sm-1">{{i.wait_list}}/{{i.wait_cap}} waitlisted</td>
+            <td class="col-sm-2">
+                {% if i.instructor.name != '-' %}
+                <a style="color: black" href = mailto:{{i.instructor.email}}>{{i.instructor.name}}</a>
+                {% endif %}
+            </td>
+            {%for meeting in i.meetings %}
+            <td class="col-sm-2">
+            {{meeting.days}} {{meeting.time}}
+            </td>
+            <td class="col-sm-2">{{meeting.facility_description}}
+            </td>
+            {%endfor%}
+            {% if user.is_authenticated %}
+            <td class="col-sm-2">
+                <form class="form-inline my-2 my-lg-0" method=POST action="{% url 'homepage:addtolist' %}">
+                    {% csrf_token %}
+                    <input class = 'course_title' value ="{{all_classes|get_item:y}}" name = "course_title_add" type = "hidden">
+                    <input class = 'course_type' value = {{i.component}} name = "course_type_add" type = "hidden">
+                    <input value = "{{i.meeting_time}}" name = "course_time_add" type = "hidden">
+                    <input class = 'course_instructor' value = "{{i.instructor.name}}" name = "course_instructor_add" type = "hidden">
+                    <input class = 'course_enrolled' value = "{{i.enrollment_total}}/{{i.class_capacity}}" name = "course_enrolled_add" type = "hidden">
+                    <input class = 'course_waitlisted' value = "{{i.wait_list}}/{{i.wait_cap}}" name = "course_waitlisted_add" type = "hidden">
+
+                    <input value ="{{y}}" name = "course_name_add" type = "hidden">
+                    <input value = "{{i.meeting_day}}" name = "course_days_add" type = "hidden">
+                    <input value = "{{i.location}}" name = "location" type = "hidden">
+                    <input class = 'course_sect' value = {{i.course_section}} name = "course_section_add" type = "hidden">
+                    <input value={{i.course_number}} name="courseAddedToList" type="hidden">
+                    <input value = {{i.more_than_one_meeting}} name = "more_than_one_meeting" type="hidden">
+                    <input name="meeting_day_and_time" value = "{{i.meeting_day_and_time}}" type="hidden">
+                    <input name= "start_time_struct_for_1_meeting" value="{{i.start_time_struct}}"  type="hidden">
+                    <input name= "end_time_struct_for_1_meeting"  value="{{i.end_time_struct}}" type="hidden">
+                    <input name= "start_time_struct_for_more_1_meeting"  value="{{i.start_time_structs}}" type="hidden">
+                    <input name= "end_time_struct_for_more_1_meeting"  value="{{i.end_time_structs}}" type="hidden">
+                    <input name= "locations"  value="{{i.locations}}" type="hidden">
+                    <input name= "credit"  value="{{i.units}}" type="hidden">
+                    <button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Add To Course List</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endfor %}
+</div>
+
+<div class = "spacefill"></div>
+{% endblock %}
+

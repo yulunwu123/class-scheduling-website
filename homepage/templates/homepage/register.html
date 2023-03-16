@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+{% block title %}Create an Account{% endblock%}
+{% block content %}
+<h1>Create an account</h1>
+<p>Create an account to unlock more features like calendar and friends.</p>
+<div>
+  <a class="btn btn-outline-dark" href="{% provider_login_url 'google' %}" role="button">
+    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+    Continue with Google
+  </a>
+</div>
+
+<style>
+.divider {
+  margin-top:10px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+/* To show the lines on right
+and left sides of the text */
+.divider::after,
+.divider::before {
+  content: "";
+  border: 1px solid gray;
+  flex: 1;
+}
+
+/* Space on left and right sides of text */
+.divider:not(:empty)::before {
+  margin-right: 0.25em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: 0.25em;
+}
+</style>
+<div class="divider">Or email</div>
+
+<form method="post">
+    {{user_form.as_p}}
+    {% csrf_token %}
+    <p><input type="submit" value="Create my account"></p>
+</form>
+
+
+{% endblock %}
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: How to add centered text to the horizontal divider in HTML using CSS?
+*  Author: Melvin George
+*  URL: css from https://melvingeorge.me/blog/add-text-in-center-on-divider-hr-html-css
+*  NOTES: help with css style
+*
+***************************************************************************************/-->

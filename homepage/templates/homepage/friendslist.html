@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extraCSS %}
+<link rel="stylesheet" href="{% static 'homepage/css/friendslist.css' %}">
+{% endblock%}
+{% block content %} <!-- https://github.com/revsys/django-friendship -->
+
+<h1 style="font-family: 'Bebas Neue', cursive;"> My Friends </h1>
+<table class="table">
+    <div class="row">
+        <div>
+            <form  id="form1" class="form-inline" method=GET action="{% url 'homepage:searchfriend' %}"> <!-- https://stackoverflow.com/questions/5560975/how-do-i-move-this-to-the-right -->
+            {% csrf_token %}
+                <input style="font-family: 'fire';" class="form-control" type="text" placeholder="Search User" name="friendsearch">
+                <div>
+                    <button style="font-family: 'fire'" class="btn btn-outline-secondary my-sm-0" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</table>
+
+{% if is_search_input %}
+<div class="card" style="width: 30rem;">
+    <div class="card-header">
+        {% if profiles_searched %}
+        <h6>Search Results</h6>
+        {% else %}
+        <h6>No Search</h6>
+        {% endif %}
+    </div>
+    {% if profiles_searched %}
+    <ul class="list-group list-group-flush">
+        {% for i in profiles_searched%}
+        <li class="list-group-item">
+            <span>{{i.0.user.username}}</span>
+            <span style="float: right;">
+                {% if i.1 %} <!-- if is a friend-->
+                <a class="btn btn-primary btn-sm" href="{% url 'homepage:schedule_builder' i.0.user.id %}"
+                        role="button">Schedule</a>
+                {% elif i.0 == myself%} <!-- if myself-->
+                <a class="btn btn-primary btn-sm" href="{% url 'homepage:dashboard' %}"
+                        role="button">My Dashboard</a>
+                {% else %} <!-- if not a friend-->
+                <a class="btn btn-primary btn-sm" href="{% url 'homepage:send_friend_request' i.0.id %}"
+                        role="button">Add Friend</a>
+                {% endif %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endif %} <!-- only displays the card view when there's search -->
+
+<!-- modified HTML & CSS code based on https://codepen.io/vivek-kumar/pen/naMJBM -->
+<!-- 3-Column CONTAINER -->
+<div class="pricing-table group">
+    <!-- Friends List -->
+    <div class="block personal fl">
+        <!-- Header -->
+        <div class="content">
+            <p class="price">
+                <h2>Current Friends</h2>
+            </p>
+            {% if friends != None %}
+            <p class="hint">Click on a friend to see their schedule.</p>
+            {% else %}
+            <p class="hint">You have no friends yet.</p>
+            {% endif %}
+        </div>
+        <!-- /Header -->
+        <!-- List of Friends -->
+        <ul class="features">
+            {% if friends != None %}
+            {% for i in friends %}
+            <li>
+              <span class="fontawesome-star"></span>
+              <span><a href="{% url 'homepage:schedule_builder' i.user.id %}" class="btn btn-secondary btn-sm">{{i.user.username}}</a></span>
+              <span>
+                <a class="btn btn-primary btn-sm" href="{% url 'homepage:delete_friend' i.id %}"
+                        role="button">Delete</a>
+              </span>
+            </li>
+            {% endfor %}
+            {% else %}
+            {% endif %}
+        </ul>
+        <!-- /List of Friends -->
+    </div>
+    <!-- /Friends List -->
+
+    <!-- Requests To Current User -->
+    <div class="block professional fl">
+        <!-- Header -->
+        <div class="content">
+            <p class="price">
+                <h2>Requests To You</h2>
+            </p>
+            {% if friend_requests_to_me != None %}
+            <p class="hint">Accept or delete a friend request.</p>
+            {% else %}
+            <p class="hint">No friend requests from other users.</p>
+            {% endif %}
+        </div>
+        <!-- /Header -->
+        <!-- Requests to add you. -->
+        <ul class="features">
+            {% if friend_requests_to_me != None %}
+            {% for req in friend_requests_to_me %}
+            <li>
+                <span class=""></span>
+                <span>From: {{req.sender.user}}</span>
+                <span>
+                    <a class="btn btn-success btn-sm" href="{% url 'homepage:accept_friend_request' req.id %}"
+                        role="button">Accept</a>
+                    <a class="btn btn-primary btn-sm" href="{% url 'homepage:cancel_friend_request' req.id %}"
+                    role="button">Delete</a>
+                </span>
+            </li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+        <!-- /Requests to add you. -->
+    </div>
+    <!-- /Requests To Current User -->
+
+    <!-- Requests From Current User -->
+    <div class="block business fl">
+        <!-- Header -->
+        <div class="content">
+            <p class="price">
+              <h2>Requests You Sent</h2>
+            </p>
+            {% if friend_requests_from_me != None%}
+            <p class="hint">You can cancel a friend request.</p>
+            {% endif %}
+        </div>
+        <!-- /Header -->
+        <!-- List of Requests -->
+        <ul class="features">
+            {% if friend_requests_from_me != None%}
+            {% for req in friend_requests_from_me %}
+            <li>
+              <span class="fontawesome-star"></span>
+              <span>To: {{req.receiver.user}}</span>
+                <span>
+                    <a class="btn btn-primary btn-sm"
+                            href="{% url 'homepage:cancel_friend_request' req.id %}"
+                           role="button">Cancel</a>
+                </span>
+            </li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+        <!-- /List of Requests -->
+    </div>
+    <!-- /Requests From Current User -->
+</div>
+<!-- /3-Column Container -->
+<div class = "spacefill"/>
+{% endblock %}
+
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: Flat Pricing Table
+*  Author: Codepen: Vivek kumar
+*  URL: https://codepen.io/vivek-kumar/pen/naMJBM
+*  NOTES: modified HTML & CSS code
+*
+*  Title: Django-Friendship
+*  Author: Jeff Triplett
+*  URL:  https://github.com/revsys/django-friendship
+*  NOTES: help understanding and implementing friends
+*
+*  Title: How do I move this to the right?
+*  Author: StackOverflow Community
+*  URL:   https://stackoverflow.com/questions/5560975/how-do-i-move-this-to-the-right
+*  NOTES: help fixing styling for friends
+*
+***************************************************************************************/-->

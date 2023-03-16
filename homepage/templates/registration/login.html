@@ -1,0 +1,53 @@
+<!-- 
+  *Title: User Registration in Django using Google OAuth
+  *Author: Geoffrey Mungai
+  *Date: December 18, 2020
+  *Code version: Written in HTML
+  *URL: https://www.section.io/engineering-education/django-google-oauth/
+  *Software License: N/A
+-->
+
+{% extends 'base.html' %}
+{% load socialaccount %}
+{% block title %}Log-in{% endblock%}
+
+{% block content %}
+<h1>Login</h1>
+{% if form.errors %}
+<p>Your username and password didn't match. <br>Please try again.</p>
+
+{% else %}
+<p>Use the following form to login. If you don't have an account,
+    <a href="{% url 'homepage:register' %}">sign up here.</a></p>
+{% endif %}
+<div class="row">
+    <div class="col">
+        <div class="login-form">
+            <form method="post" action="{% url 'homepage:login' %}">
+                {{form.as_p}}
+                {% csrf_token %}
+                <input type="hidden" name="text" value="{{next}}"/>
+                <p><input type="submit" value="Log in"></p>
+            </form>
+
+            <p><a href="{% url 'homepage:password_reset' %}">Forgot password?</a></p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="google-login-btn">
+            <a class="btn btn-outline-dark" href="{% provider_login_url 'google' %}" role="button">
+                <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google logo"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
+                Login with Google
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="spacefill"></div>
+
+
+{% endblock %}

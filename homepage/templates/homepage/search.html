@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load homepage_filters %}
+{% block content %}
+
+{% if searched and searched2%}
+<h1> Search results... </h1>
+<div>
+        <table class="table table-bordered table-hover">
+            <tr>
+            <th class="col-sm-1" colspan='1' style="background: lightblue">{{searched}} {{searched2}}</th>
+            <th class="CourseName" colspan="11" style="background: CadetBlue">{{course_name}}</th>
+            </tr>
+            {% for y in list_of_classes %}
+            <tr class="table-success">
+                <td>{{y.course_section}}-{{y.component}} {{y.course_number}}</td>
+                <td class="col-sm-1">{{y.enrollment_total}}/{{y.class_capacity}} enrolled</td>
+                <td class="col-sm-1">{{y.wait_list}}/{{y.wait_cap}} waitlisted</td>
+                <td class="col-sm-2">
+                    {% if i.instructor.name != '-' %}
+                    <a style="color: black" href = mailto:{{y.instructor.email}}>{{y.instructor.name}}</a>
+                    {% endif %}
+                </td>
+                {%for meeting in y.meetings %}
+                <td class="col-sm-2"> {{meeting.days}} {{meeting.time}}</td>
+                <td class="col-sm-2">{{meeting.facility_description}}</td>
+                {%endfor%}
+
+                {% if user.is_authenticated %}
+                <td class="col-sm-2">
+                <form method=POST action="{% url 'homepage:addtolist' %}">
+                    {% csrf_token %}
+                    <input value ="{{course_name}}" name = "course_title_add" type = "hidden">
+                    <input value = {{y.component}} name = "course_type_add" type = "hidden">
+                    <input value = "{{y.meeting_time}}" name = "course_time_add" type = "hidden">
+                    <input value = "{{y.instructor.name}}" name = "course_instructor_add" type = "hidden">
+                    <input value = "{{y.enrollment_total}}/{{y.class_capacity}}" name = "course_enrolled_add" type = "hidden">
+                    <input value = "{{y.wait_list}}/{{y.wait_cap}}" name = "course_waitlisted_add" type = "hidden">
+
+                    <input value ="{{searched}} {{searched2}}" name = "course_name_add" type = "hidden">
+                    <input value = "{{y.meeting_day}}" name = "course_days_add" type = "hidden">
+                    <input value = {{y.course_section}} name = "course_section_add" type = "hidden">
+                    <input value = "{{y.location}}" name = "location" type = "hidden">
+                    <input value={{y.course_number}} name="courseAddedToList" type="hidden">
+                    <input value = {{y.more_than_one_meeting}} name = "more_than_one_meeting" type="hidden">
+                    <input name="meeting_day_and_time" value = "{{y.meeting_day_and_time}}" type="hidden">
+                    <input name= "start_time_struct_for_1_meeting" value="{{y.start_time_struct}}"  type="hidden">
+                    <input name= "end_time_struct_for_1_meeting"  value="{{y.end_time_struct}}" type="hidden">
+                    <input name= "start_time_struct_for_more_1_meeting"  value="{{y.start_time_structs}}" type="hidden">
+                    <input name= "end_time_struct_for_more_1_meeting"  value="{{y.end_time_structs}}" type="hidden">
+                    <input name= "locations"  value="{{y.locations}}" type="hidden">
+                    <input name= "credit"  value="{{y.units}}" type="hidden">
+                    <button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Add To Course List</button>
+                </form>
+                </td>
+                {% endif %}
+
+            </tr>
+            {% endfor %}
+        </table>
+
+</div>
+{% else %}
+    <h1> No search </h1>
+    <div class = "spacefill"></div>
+    <div class = "spacefill"></div>
+{% endif %}
+
+<div class="spacefill"></div>
+
+{% endblock %}
+
+<!--                 <py-script> print(meeting.start_time) </py-script> -->
+<!-- <a id="start" href = search.html value={{meeting.start_time}}></a>
+                <script>
+                    var testing = "hello";
+                    window.onload = function() {
+                        start = document.getElementById("start").innerHTML;
+                        console.log(start);
+                    }
+                </script>
+ -->

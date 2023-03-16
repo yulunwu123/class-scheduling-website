@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}  <!-- https://github.com/revsys/django-friendship -->
+<!-- <div class="table-responsive"> -->
+<h1 style="font-family: 'Bebas Neue', cursive;"> My Friends </h1>
+
+<table class="table">
+    <div class="row">
+        <div>
+            <form  id="form1" class="form-inline" method=POST action="{% url 'homepage:searchfriend' %}"> <!-- https://stackoverflow.com/questions/5560975/how-do-i-move-this-to-the-right -->
+            {% csrf_token %}
+                <input style="font-family: 'fire';" class="form-control" type="text" placeholder="Search User" name="friendsearch">
+                <div>
+                    <button style="font-family: 'fire'" class="btn btn-outline-secondary my-sm-0" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</table>
+
+
+  <table class="table table-bordered table-hover"> <!-- https://getbootstrap.com/docs/5.1/content/tables/ -->
+    <thead>
+    <tr>
+      <th scope="col">Current Friends</th>
+      <th scope="col">Active Friend Requests</th>
+      <th scope="col">Pending Friend Requests</th>
+    </tr>
+  </thead>
+<!-- </div> -->
+<tbody>
+    <tr>
+        <td>
+            {% if friends != None %}
+            <ul style="list-style-type: none; padding: 0px">
+                {% for i in friends %}
+                <li>
+                    <a href="{% url 'homepage:schedule_builder' i.user.id %}" class="btn btn-outline-secondary my-2 my-sm">{{i.user.username}}</a>
+                    <a class="btn btn-outline-secondary my-2 my-sm" href="{% url 'homepage:delete_friend' i.id %}"
+                        role="button" style="margin-left:10px">Delete</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <h5>You have no friends yet.</h5>
+            {% endif %}
+        </td>
+
+        <td>
+            {% if friend_requests_to_me != None%}
+            <ul style="list-style-type: none">
+            {% for fq in friend_requests_to_me %}
+                <li>
+                From: {{fq.sender.user}}
+                <a class="btn btn-outline-secondary my-2 my-sm" href="{% url 'homepage:accept_friend_request' fq.id %}"
+                   role="button" style="margin-left:10px">Accept</a>
+                    <a class="btn btn-outline-secondary my-2 my-sm" href="{% url 'homepage:cancel_friend_request' fq.id %}"
+                   role="button" style="margin-left:10px">Delete</a>
+                </li>
+            {% endfor %}
+            </ul>
+            {%else %}
+            <h5>No friend requests from other users.</h5>
+            {% endif %}
+        </td>
+
+        {% if friend_requests_from_me != None%}
+        <td>
+            <ul>
+                {% for fq in friend_requests_from_me %}
+                    <li>
+                        To: {{fq.receiver.user}} <a class="btn btn-outline-secondary my-2 my-sm"
+                            href="{% url 'homepage:cancel_friend_request' fq.id %}"
+                           role="button" style="margin-left:10px">Cancel</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </td>
+        {% else %}
+        <th>
+            <h5>You don't have any pending requests.</h5>
+        </th>
+    {% endif %}
+    </tr>
+
+
+
+
+</tbody>
+</table>
+
+
+<!--{% for i in all_users %}-->
+<!--        <li>-->
+<!--            {{i.user}}{% csrf_token %}-->
+<!--            <a class="btn btn-outline-secondary my-2 my-sm" href="{% url 'homepage:send_friend_request' i.id %}"-->
+<!--               role="button" style="margin-left:10px">Add Friend</a>-->
+<!--        </li>-->
+<!--        {% endfor %}-->
+<div class = 'spacefill'></div><div class = 'spacefill'></div>
+{% endblock %}
+<!--/***************************************************************************************
+*  REFERENCES
+*  Title: How do I move this to the right?
+*  Author: StackOverflow Community
+*  URL:   https://stackoverflow.com/questions/5560975/how-do-i-move-this-to-the-right
+*  NOTES: help fixing styling for friends
+*
+*  Title: Django-Friendship
+*  Author: Jeff Triplett
+*  URL:  https://github.com/revsys/django-friendship
+*  NOTES: help understanding and implementing friends
+*
+*  Title: Tables
+*  Author: getbootstrap.com Team
+*  URL: https://getbootstrap.com/docs/5.1/content/tables/
+*  NOTES: styling tables
+*
+***************************************************************************************/-->

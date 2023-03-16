@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load homepage_filters %}
+
+{% block content %}
+<h1>Your Courses:</h1>
+
+
+    <div class="container-fluid p-5 bg-info text-white text-center">
+        <h1> Course List </h1>
+        {% if course_list %}
+            <ul>
+                {% for course in course_list %}
+                {% if more_than_one_meeting == "True" %}
+                <li>
+                <p> {{course.course_sect}}-{{course.course_type}}-{{course.class_num}} | {{course.course_acronym}}  | {{course.course_title}}
+                {% if course.course_instructor != '-' %} | {{course.course_instructor}} {% endif %}</p>
+                <p> {% for meeting in list_of_day_time%}
+                    {{meeting}} |
+                    {% endfor %}
+                    {{course.course_enrolled}} enrolled
+                    | {{course.course_waitlisted}} waitlisted</p>
+                </li>
+
+
+                {% else %}
+                <li>
+                    <p> {{course.course_sect}}-{{course.course_type}}-{{course.class_num}} | {{course.course_acronym}}  | {{course.course_title}}
+                    {% if course.course_instructor != '-' %} | {{course.course_instructor}} {% endif %}</p>
+                    <p>  {{course.course_days}}: {{course.course_time}} | {{course.course_enrolled}} enrolled
+                        | {{course.course_waitlisted}} waitlisted</p>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No Courses Added Yet</p>
+        {% endif %}
+    </div>
+
+    <div class="spacefill"></div>
+    <div class="spacefill"></div>
+    <div class="spacefill"></div>
+
+{% endblock %}

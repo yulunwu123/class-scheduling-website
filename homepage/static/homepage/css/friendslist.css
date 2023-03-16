@@ -1,0 +1,157 @@
+
+/*
+Title: Flat Pricing table
+Author: Vivek kumar
+Date: January 2, 2014
+URL: https://codepen.io/vivek-kumar/pen/naMJBM
+*/
+
+  /*--------- Font ------------*/
+@import url(https://fonts.googleapis.com/css?family=Droid+Sans);
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+/* fontawesome */
+[class*="fontawesome-"]:before {
+  font-family: 'FontAwesome', sans-serif;
+}
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/*------ utility classes -----*/
+.fl{ float:left; }
+.fr{ float: right; }
+/*its also known as clearfix*/
+.group:before,
+.group:after {
+    content: "";
+    display: table;
+}
+.group:after {
+    clear: both;
+}
+.group {
+    zoom: 1;  /*For IE 6/7 (trigger hasLayout) */
+}
+
+.pricing-table {
+    width: 90%;
+    margin: 20px auto;
+    text-align: center;
+    padding: 10px;
+    padding-right: 0;
+}
+
+.block{
+    width: 30%;
+    margin: 0 15px;
+    overflow: hidden;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+/*Shared properties*/
+.content{
+    position: relative;
+    color: #FEFEFE;
+    padding: 20px 0 10px 0;
+}
+/*arrow creation*/
+.content:after, .content:before{
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.content:after,{
+	border-color: rgba(136, 183, 213, 0);
+	border-width: 5px;
+	margin-left: -5px;
+}
+
+/*/arrow creation*/
+.price{
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.625rem;
+}
+.price span{
+    font-size: 6rem;
+    letter-spacing: 8px;
+    font-weight: bold;
+}
+
+.hint{
+    font-style: italic;
+    font-size: 0.9rem;
+}
+.features{
+    list-style-type: none;
+    background: #FFFFFF;
+    text-align: left;
+    color: #9C9C9C;
+    padding:20px 5%;
+    font-size: 0.9rem;
+}
+
+/*
+Title: CSS List Style: 20+ examples
+Author: Shark Coder
+URL: https://sharkcoder.com/blocks/list#section7
+Comments: For the border-bottom
+*/
+.features li{
+    padding:15px 0;
+    width: 100%;
+    border-bottom: 1px #404B51 dotted;
+}
+.features li span{
+   padding-right: 0.4rem;
+}
+
+.features li span:nth-child(3) {
+  float: right;
+}
+
+/*left-most column*/
+.personal .content{
+    background: #82DACA;
+}
+.personal .content:after{
+	border-top-color: #82DACA;
+}
+
+/*middle column*/
+.professional .content{
+    background: #53CFE9;
+}
+.professional .content:after{
+	border-top-color: #53CFE9;
+}
+
+/*right-most column*/
+.business .content{
+    background: #EB6379;
+}
+.business .content:after{
+	border-top-color: #EB6379;
+}
+
+.card{
+    border-radius: 12px;
+}
+
+
