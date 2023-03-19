@@ -1,6 +1,3 @@
-#### this is code given to us from an example django setup, we will only cite extra websites 
-#### used in addition to the given code
-
 """
 Django settings for hooslist project.
 
@@ -34,11 +31,11 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SECRET_KEY = 'django-insecure-lz=gy%j9t%e(56p#%zg(-pi^(*6$6dqv299rg19liw=ynpof-i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "a4-hoos-list.herokuapp.com"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "hooslist.herokuapp.com"]
 
 # a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions
 # SESSION_COOKIE_SECURE = True
@@ -53,6 +50,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "a4-hoos-list.herokuapp.com"]
 # code: code written in python and html
 # url: https://www.section.io/engineering-education/django-google-oauth/
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'homepage.apps.HomepageConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -112,14 +110,20 @@ if 'test' in sys.argv:
         }
     }
 else:
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #         'NAME': 'ddvvgctbqufd29',
+    #         'USER': 'yelleimsoappse',
+    #         'PASSWORD': '01954a5e8892f0e51863e8ba99d7d26bd6417ad81415dc8d2f2d9a93eb50a1a4',
+    #         'HOST': 'ec2-18-215-96-22.compute-1.amazonaws.com',
+    #         'PORT': '5432',
+    #     }
+    # }
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'ddvvgctbqufd29',
-            'USER': 'yelleimsoappse',
-            'PASSWORD': '01954a5e8892f0e51863e8ba99d7d26bd6417ad81415dc8d2f2d9a93eb50a1a4',
-            'HOST': 'ec2-18-215-96-22.compute-1.amazonaws.com',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'mydatabase',
         }
     }
 
@@ -201,7 +205,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 try:
     if 'HEROKU' in os.environ:
         import django_heroku
-
         django_heroku.settings(locals())
 except ImportError:
     found = False

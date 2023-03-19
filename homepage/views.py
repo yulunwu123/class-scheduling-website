@@ -5,27 +5,175 @@ from datetime import datetime, date
 from django.utils.safestring import mark_safe
 import requests
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
 from .forms import LoginForm, UserRegistrationForm, UserEditForm, CommentForm, ProfileForm
 from .models import Profile, FriendRequest, Friend, CourseModel, Event, Comment
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
-from django.views import generic
 import re
 from time import strptime
 from .utils import WeeklyTimeTable
 from django.http import HttpResponseRedirect
 
 
-class ScheduleView(generic.ListView):  # this class is no longer used
-    model = Event
-    template_name = 'homepage/schedule_builder.html'
+# landing page that displays all departments
+def index(request):
+    response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                            ".FieldFormula.IScript_ClassSearchOptions?institution=UVA01&term=1232").json()["subjects"]
+    columns = 16
+    result = []
+    for x in range(0, len(response) - 15, columns):
+        row = []
+        for i in range(x, x + columns):
+            row.append(response[i]["subject"])
+        result.append(row)
+    if len(response) % columns != 0:
+        rest = len(response) % 16
+        for j in range(len(response) - rest, len(response)):
+            row = [response[j]["subject"]]
+        result.append(row)
+    return render(request, 'homepage/index.html', {'response': result})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['calendar'] = mark_safe("test string")
-        return context
+
+# each department search
+def department(request, department):
+    response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                            f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={department}").json()
+    # changes the data so that all labs and lectures of the same class belong together
+    modified_dict = {}
+    # list of all classes' names
+    class_names_list = []
+    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
+    all_classes = {}
+    for each in response:
+        class_name = department + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
+        meeting_day = ""  # used only when the class has 1 "meetings" element
+        time = ""
+        location = ""  # used only when the class has 1 "meetings" element
+        start_time_struct = ""  # for classes with 1 meeting element
+        end_time_struct = ""  # for classes with 1 meeting element
+        start_time_structs = ""  # for classes with > 1 meeting element
+        end_time_structs = ""  # for classes with > 1 meeting element
+        locations = ""  # same as above
+        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
+        each['more_than_one_meeting'] = False
+        if len(each["meetings"]) > 0:
+            for meeting in each["meetings"]:
+                meeting_day = meeting["days"]
+                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
+                location = meeting["facility_descr"]
+                start_time_structs += meeting["start_time"] + ";"
+                end_time_structs += meeting["end_time"] + ";"
+                meeting["time"] = time
+                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
+                start_time_struct = meeting["start_time"]
+                end_time_struct = meeting["end_time"]
+                locations += location + ";"
+            if len(each["meetings"]) > 1:
+                each['more_than_one_meeting'] = True
+        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
+        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
+        each["location"] = location  # same as above
+        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
+        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
+        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
+        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
+        locations = locations.strip(";")
+        each["locations"] = locations
+        # meeting's for-loop in html
+
+        each["instructor"] = "-"
+        if len(each["instructors"]) > 0:
+            each["instructor"] = each["instructors"][0]["name"]
+            each["email"] = each["instructors"][0]["email"]
+
+        if class_name in class_names_list:
+            modified_dict[class_name].append(each)
+        else:
+            class_names_list.append(class_name)
+            modified_dict[class_name] = [each]
+            all_classes[class_name] = each["descr"]
+    return render(request, 'homepage/department.html',
+                  {'modified_dict': modified_dict, 'all_classes': all_classes,
+                   'set_of_classes': class_names_list, 'department': department},
+                  )
+
+
+def search(request):
+    dept_and_descr = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                               ".FieldFormula.IScript_ClassSearchOptions?institution=UVA01&term=1232").json()[
+        "subjects"]
+    departments = []
+    for each in dept_and_descr:
+        departments.append(each["subject"])
+    if request.method == "POST":
+        dept_name = request.POST['subject'].upper().replace(' ', '')
+        number = request.POST['number'].replace(' ', '')
+        name = request.POST['name'].replace(' ', '')
+        # instructor = request.POST['instructor'].replace(' ', '')
+        if dept_name in departments and not number and not name:
+            return department(request, dept_name)
+        if dept_name in departments and number:
+            response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                                    f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={dept_name}").json()
+            # Find course name to make it easier to format html also checks validity of course number search
+            course_name = ''
+            day = ""
+            time = ""
+            location = ""  # used only when the class has 1 "meetings" element
+            start_time_struct = ""  # for classes with 1 meeting element
+            end_time_struct = ""  # for classes with 1 meeting element
+            start_time_structs = ""  # for classes with > 1 meeting element
+            end_time_structs = ""  # for classes with > 1 meeting element
+            locations = ""  # same as above
+            list_of_classes = []
+            num_of_iteration = 0
+            for i in response:
+                if i['catalog_nbr'] == number:
+                    i["meeting_day_and_time"] = ""  # for classes with >1 meeting elements
+                    num_of_iteration += 1
+                    if num_of_iteration == 1:  # this is just a safe approach in case that labs (which are assumed to
+                        # be after lectures in the list) have a different name
+                        course_name = i['descr']
+                    if len(i["meetings"]) > 0:
+                        for meeting in i["meetings"]:
+                            day = meeting["days"]
+                            time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
+                            meeting["time"] = time
+                            location = meeting["facility_descr"]
+                            locations += location + ";"
+                            i["meeting_day_and_time"] += day + ": " + time + ";"  # like "MoWe: time;TuTh: time"
+                            start_time_struct = meeting["start_time"]
+                            end_time_struct = meeting["end_time"]
+                            start_time_structs += meeting["start_time"] + ";"
+                            end_time_structs += meeting["end_time"] + ";"
+                    i['more_than_one_meeting'] = len(i["meetings"]) > 1
+                    i["meeting_day"] = day
+                    i["meeting_time"] = time
+                    i["location"] = location  # same as above
+                    i["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
+                    i["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
+                    i["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
+                    i["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
+                    locations.strip(";")
+                    i["locations"] = locations  # same as above
+
+                    i["instructor"] = "-"
+                    if len(i["instructors"]) > 0:
+                        i["instructor"] = i["instructors"][0]["name"]
+                        i["email"] = i["instructors"][0]["email"]
+
+                    list_of_classes.append(i)
+            if len(list_of_classes) != 0:
+                return render(request, 'homepage/search.html',
+                              {'dept_name': dept_name, 'number': number,
+                               'list_of_classes': list_of_classes, "course_name": course_name})
+            return render(request, 'homepage/search.html',
+                          {'searched': dept_name, 'searched2': None, 'response': response})
+        else:
+            return render(request, 'homepage/search.html', {})
+    else:
+        return render(request, 'homepage/search.html', {})
 
 
 def view_schedule(request, userID):
@@ -39,8 +187,6 @@ def view_schedule(request, userID):
     html_weekly_timetable = WeeklyTimeTable(schedule_owner, is_owner)
     html_weekly_timetable = mark_safe(html_weekly_timetable.output_entire_calendar())
     comments = Comment.objects.filter(user=User.objects.get(id=userID))
-    # new_comment = None
-    # Comment posted
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
@@ -100,29 +246,11 @@ def edit(request):
         if user_form.is_valid():
             user_form.save()
             messages.success(request, 'Profile updated successfully')
-            # current_profile = Profile.objects.get(user=request.user)
-            # courselist = CourseModel.objects.filter(profile_id=current_profile.id)
-            # if len(courselist) == 0:  # initialize to NULL for conditional in html file for printing course table
-            #     courselist = None
             return HttpResponseRedirect('dashboard')
         else:
             messages.error(request, 'Error in updating the profile')
             return render(request, 'homepage/edit.html', {'user_form': user_form})
-    # if request.method:
-    #     print("help")
-    #     current_profile = Profile.objects.get(user=request.user)
-    #     courselist = CourseModel.objects.filter(profile_id=current_profile.id)
-    #     if len(courselist) == 0:  # initialize to NULL for conditional in html file for printing course table
-    #         courselist = None
-    #     return render(request, 'homepage/dashboard.html', {'section': 'dashboard', 'courselist': courselist})
     else:
-        # user = request.user
-        # current_profile = Profile.objects.get(user=user)
-        # courselist = CourseModel.objects.filter(profile_id=current_profile.id)
-        # if len(courselist) == 0:  # initialize to NULL for conditional in html file for printing course table
-        #     courselist = None
-        # return render(request, 'homepage/dashboard.html', {'section': 'dashboard', 'courselist': courselist})
-        # print("hi")
         user_form = UserEditForm(instance=request.user)
         return render(request, 'homepage/edit.html', {'user_form': user_form})
 
@@ -199,164 +327,8 @@ def searchfriend(request):
     return friendslist(request, profiles_searched)
 
 
-def index(request):
-    response = requests.get("http://luthers-list.herokuapp.com/api/deptlist/").json()
-    result = []
-    for x in range(0, len(response) - 15, 16):
-        dict = {"first": response[x], "second": response[x + 1], "third": response[x + 2],
-                "fourth": response[x + 3], "fifth": response[x + 4], "sixth": response[x + 5],
-                "seventh": response[x + 6], "eighth": response[x + 7], "ninth": response[x + 8],
-                "tenth": response[x + 9], "eleventh": response[x + 10], "twelve": response[x + 11],
-                "thirteen": response[x + 12], "fourteen": response[x + 13], "fifteen": response[x + 14],
-                "sixteen": response[x + 15]}
-        result.append(dict)
-    result.append({"first": response[len(response) - 1]})
-    return render(request, 'homepage/index.html', {'response': result})
-
-
-def department(request, department):
-    response = requests.get("https://luthers-list.herokuapp.com/api/dept/" + department + "/").json()
-    # changes the data so that all labs and lectures of the same class belong together
-    modified_dict = {}
-    # list of all classes' names
-    class_names_list = []
-    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
-    all_classes = {}
-    for each in response:
-        class_name = department + " " + each["catalog_number"]  # e.g. CS 1110, thus can be duplicated
-        meeting_day = ""  # used only when the class has 1 "meetings" element
-        time = ""
-        location = ""  # used only when the class has 1 "meetings" element
-        start_time_struct = ""  # for classes with 1 meeting element
-        end_time_struct = ""  # for classes with 1 meeting element
-        start_time_structs = ""  # for classes with > 1 meeting element
-        end_time_structs = ""  # for classes with > 1 meeting element
-        locations = ""  # same as above
-        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
-        each['more_than_one_meeting'] = False
-        if len(each["meetings"]) > 0:
-            for meeting in each["meetings"]:
-                meeting_day = meeting["days"]
-                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
-                location = meeting["facility_description"]
-                start_time_structs += meeting["start_time"] + ";"
-                end_time_structs += meeting["end_time"] + ";"
-                meeting["time"] = time
-                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
-                start_time_struct = meeting["start_time"]
-                end_time_struct = meeting["end_time"]
-                locations += location + ";"
-            if len(each["meetings"]) > 1:
-                each['more_than_one_meeting'] = True
-        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
-        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
-        each["location"] = location  # same as above
-        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
-        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
-        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
-        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
-        locations = locations.strip(";")
-        each["locations"] = locations
-        # meeting's for-loop in html
-
-        if class_name in class_names_list:
-            modified_dict[class_name].append(each)
-        else:
-            class_names_list.append(class_name)
-            modified_dict[class_name] = [each]
-            all_classes[class_name] = each["description"]
-    return render(request, 'homepage/department.html',
-                  {'modified_dict': modified_dict, 'all_classes': all_classes,
-                   'set_of_classes': class_names_list, 'department': department},
-                  )
-
-
-def search(request):
-    response = requests.get("http://luthers-list.herokuapp.com/api/deptlist/").json()
-    departments = []
-    for cell in response:
-        departments.append(cell['subject'])
-    if request.method == "POST":
-        dept_name = request.POST['searched'].upper().replace(' ', '')
-        number = request.POST['searched2'].replace(' ', '')
-        if dept_name in departments and not number:
-            return department(request, dept_name)
-        if dept_name in departments and number:
-            response = requests.get("http://luthers-list.herokuapp.com/api/dept/" + dept_name + "/").json()
-            # Find course name to make it easier to format html also checks validity of course number search
-            course_name = ''
-            day = ""
-            time = ""
-            location = ""  # used only when the class has 1 "meetings" element
-            start_time_struct = ""  # for classes with 1 meeting element
-            end_time_struct = ""  # for classes with 1 meeting element
-            start_time_structs = ""  # for classes with > 1 meeting element
-            end_time_structs = ""  # for classes with > 1 meeting element
-            locations = ""  # same as above
-            list_of_classes = []
-            num_of_iteration = 0
-            for i in response:
-                if i['catalog_number'] == number:
-                    i["meeting_day_and_time"] = ""  # for classes with >1 meeting elements
-                    num_of_iteration += 1
-                    if num_of_iteration == 1:  # this is just a safe approach in case that labs (which are assumed to
-                        # be after lectures in the list) have a different name
-                        course_name = i['description']
-                    if len(i["meetings"]) > 0:
-                        for meeting in i["meetings"]:
-                            day = meeting["days"]
-                            time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
-                            meeting["time"] = time
-                            location = meeting["facility_description"]
-                            locations += location + ";"
-                            i["meeting_day_and_time"] += day + ": " + time + ";"  # like "MoWe: time;TuTh: time"
-                            start_time_struct = meeting["start_time"]
-                            end_time_struct = meeting["end_time"]
-                            start_time_structs += meeting["start_time"] + ";"
-                            end_time_structs += meeting["end_time"] + ";"
-                    i['more_than_one_meeting'] = len(i["meetings"]) > 1
-                    i["meeting_day"] = day
-                    i["meeting_time"] = time
-                    i["location"] = location  # same as above
-                    i["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
-                    i["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
-                    i["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
-                    i["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
-                    locations.strip(";")
-                    i["locations"] = locations  # same as above
-                    list_of_classes.append(i)
-            if len(list_of_classes) != 0:
-                return render(request, 'homepage/search.html',
-                              {'searched': dept_name, 'searched2': number,
-                               'list_of_classes': list_of_classes, "course_name": course_name})
-            return render(request, 'homepage/search.html',
-                          {'searched': dept_name, 'searched2': None, 'response': response})
-        else:
-            return render(request, 'homepage/search.html', {})
-    else:
-        return render(request, 'homepage/search.html', {})
-
-
 class CustomLoginView(LoginView):
     authentication_form = LoginForm
-
-
-def toFormat(time):
-    if len(time) < 2:
-        result = ""
-    else:
-        hour = time[:2]
-        minute = time[3:5]
-        if 0 <= int(hour) <= 11:
-            result = hour + ":" + minute + "am"
-        else:
-            if int(hour) != 12:
-                hour = int(hour) - 12
-            else:
-                hour = 12
-            minute = time[3:5]
-            result = str(hour) + ":" + minute + "pm"
-    return result
 
 
 @login_required()
@@ -396,14 +368,9 @@ def send_friend_request(request, userID):
     if created:
         messages.info(request, 'You have sent a request to user')
         return redirect('homepage:friendslist')
-        # return HttpResponseRedirect('friendslist')
-        # return HttpResponse('')
     else:
         messages.info(request, 'Friend request was already sent!')
         return redirect('homepage:friendslist')
-        # return HttpResponseRedirect('friendslist')
-        # return HttpResponse(status=204)
-        # return render(request, 'homepage/friendslist.html')
 
 
 @login_required
@@ -483,7 +450,8 @@ def addToList(request):
         for day_time in list_of_day_time:  # number of meeting elements
             days = day_time.split(":")[0]  # days in each meeting element, e.g Mo or MoWe
             try:
-                new_start_time = strptime(start_time_struct_for_more_1_meeting[count], "%H.%M.%S.000000%z")  # struct time
+                new_start_time = strptime(start_time_struct_for_more_1_meeting[count],
+                                          "%H.%M.%S.000000%z")  # struct time
             except:
                 valid_time = False
                 new_start_time = start_time_struct_for_more_1_meeting[count]
@@ -581,34 +549,27 @@ def addToList(request):
     # if not overlapped:
     return redirect("homepage:schedule_builder", userID=userID)
 
-    # counter = 0
-    # for i in range(0, len(day_s), 2):
-    #     char_1, char_2 = day_s[i], day_s[i + 1]
-    #     day = char_1 + char_2
-    #     eventy = Event(title=num.course_title, description=num.course_title, day=day, start_time=start_time,
-    #                    end_time=stop_time)
-    #     try:
-    #         event_temp = Event.objects.get(day=day, start_time=start_time, end_time=stop_time)
-    #         for i in range(0, len(day_s), 2):
-    #             if counter == 0:
-    #                 break
-    #             char_1, char_2 = day_s[i], day_s[i + 1]
-    #             day = char_1 + char_2
-    #             event_instance = Event(title=num.course_title, description=num.course_title, day=day,
-    #                                    start_time=start_time, end_time=stop_time)
-    #             if event_temp == event_instance:
-    #                 event_instance.delete()
-    #                 break
-    #             event_instance.delete()
-    #         break
-    #         pass
-    #     except ObjectDoesNotExist:
-    #         eventy.save()
-    #         counter += 1
-
 
 def showSchedule(request):
     return render(request, 'homepage/schedule.html')
+
+
+def toFormat(time):
+    if len(time) < 2:
+        result = ""
+    else:
+        hour = time[:2]
+        minute = time[3:5]
+        if 0 <= int(hour) <= 11:
+            result = hour + ":" + minute + "am"
+        else:
+            if int(hour) != 12:
+                hour = int(hour) - 12
+            else:
+                hour = 12
+            minute = time[3:5]
+            result = str(hour) + ":" + minute + "pm"
+    return result
 
 
 # splits a string on uppercase letters, so that MoWeFr --> 3 days instead of 1
