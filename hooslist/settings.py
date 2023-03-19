@@ -110,20 +110,14 @@ if 'test' in sys.argv:
         }
     }
 else:
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #         'NAME': 'ddvvgctbqufd29',
-    #         'USER': 'yelleimsoappse',
-    #         'PASSWORD': '01954a5e8892f0e51863e8ba99d7d26bd6417ad81415dc8d2f2d9a93eb50a1a4',
-    #         'HOST': 'ec2-18-215-96-22.compute-1.amazonaws.com',
-    #         'PORT': '5432',
-    #     }
-    # }
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'mydatabase',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'db5q37cs9ggsd2',
+            'USER': 'nexhetjuxhplyr',
+            'PASSWORD': '3f75d3d4d7e24b98f8b85b3e17f26dd5c1e6e23e26558d9c68cdee655f5e7652',
+            'HOST': 'ec2-3-234-204-26.compute-1.amazonaws.com',
+            'PORT': '5432',
         }
     }
 
