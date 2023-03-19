@@ -1,27 +1,3 @@
-/*
-*
-*Title: Writing your first django app, part 6
-*Author: Django
-*Date: 2005-2022
-*Code version: 4.1
-*URL: https://docs.djangoproject.com/en/4.1/intro/tutorial06/#writing-your-first-django-app-part-6
-*Software License: Django Software Foundation
-*Title: backdrop
-*Author: Mojtaba Seyedi
-*Date: August 3, 2021
-*Code version: Written in CSS
-*URL: https://css-tricks.com/almanac/selectors/b/backdrop/
-*Software License: N/A
-*/
-
-/*
-*Title: Empty div (with style:height) will not display
-*Author: Stack Overflow
-*Date: September 25, 2013
-*Code version: Written in CSS
-*URL: https://stackoverflow.com/questions/18994830/empty-div-with-style-height-will-not-display
-*Software License: N/A
-*/
 .spacefill{
     height:400px;
     width:100%;
@@ -36,15 +12,20 @@ body {
     );
 }
 
-/*
-*Title: python_code
-*Author: netsetos
-*Date: February 8, 2021
-*Code version: Written in CSS
-*URL: https://github.com/netsetos/python_code/blob/master/base.css
-*Software License: N/A
-*/
-/* forms */
+.header {
+  padding: 40px;
+  border-radius: 30px;
+  background: #FE7E9C;
+  color: black;
+  font-size: 30px;
+  font-family: 'Bebas Neue', cursive;
+}
+
+caption.caption-top {
+    font-weight: bold;
+    font-family: 'fire';
+}
+
 form {
     overflow:auto;
 }
@@ -133,6 +114,16 @@ ul.messages li a.close {
 .login-form {
     float:left;
 }
+
+#box { /*https://www.webucator.com/article/how-to-create-boxes-with-rounded-corners-in-css/*/
+  border-radius: 25px;
+  background: #FFB6C1;
+  padding: 20px;
+  width: 1109px;
+  height: 225px;
+}
+
+
 
 
 
