@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load homepage_filters %}
 {% block content %}
 {% load static %}
 <!-- CSS styling source -->
@@ -58,7 +58,7 @@
             {% for cell in row %}
             <td class="tcell" style="background-color:#FFB6C1">
                 <p class="font-weight-bold">
-                    <a class="text-dark" href="/department/{{cell}}">{{cell}}</a>
+                    <a class="text-dark" href="/department/{{full_name_abbreviation_dict|get_item:cell}}">{{cell}}</a>
             </td>
             {% endfor %}
         </tr>
