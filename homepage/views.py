@@ -1,3 +1,5 @@
+import json
+
 from allauth.account.forms import UserForm
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -18,21 +20,28 @@ from django.http import HttpResponseRedirect
 
 # landing page that displays all departments
 def index(request):
-    response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                            ".FieldFormula.IScript_ClassSearchOptions?institution=UVA01&term=1232").json()["subjects"]
-    columns = 16
+    columns = 2
     result = []
-    for x in range(0, len(response) - 15, columns):
-        row = []
-        for i in range(x, x + columns):
-            row.append(response[i]["subject"])
-        result.append(row)
-    if len(response) % columns != 0:
-        rest = len(response) % 16
-        for j in range(len(response) - rest, len(response)):
-            row = [response[j]["subject"]]
-        result.append(row)
-    return render(request, 'homepage/index.html', {'response': result})
+    full_name_abbreviation_dict = {}
+    with open('homepage/static/arts_sciences_depts.json') as data_file:
+        arts_and_sciences_depts = json.load(data_file)
+        for x in range(0, len(arts_and_sciences_depts) - 1, columns):
+            row = []
+            for i in range(x, x + columns):
+                row.append(arts_and_sciences_depts[i]["full_name"])
+                full_name_abbreviation_dict[arts_and_sciences_depts[i]["full_name"]] = \
+                    arts_and_sciences_depts[i]["abbreviation"]
+            result.append(row)
+        if len(arts_and_sciences_depts) % columns != 0:
+            rest = len(arts_and_sciences_depts) % columns
+            for j in range(len(arts_and_sciences_depts) - rest, len(arts_and_sciences_depts)):
+                row = [arts_and_sciences_depts[j]["full_name"]]
+                full_name_abbreviation_dict[arts_and_sciences_depts[i]["full_name"]] = \
+                    arts_and_sciences_depts[i]["abbreviation"]
+            result.append(row)
+
+    return render(request, 'homepage/index.html', {'response': result,
+                                                   'full_name_abbreviation_dict': full_name_abbreviation_dict})
 
 
 # each department search
@@ -101,7 +110,7 @@ def department(request, department):
 
 def search(request):
     dept_and_descr = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                               ".FieldFormula.IScript_ClassSearchOptions?institution=UVA01&term=1232").json()[
+                                  ".FieldFormula.IScript_ClassSearchOptions?institution=UVA01&term=1232").json()[
         "subjects"]
     departments = []
     for each in dept_and_descr:

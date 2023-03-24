@@ -31,7 +31,7 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SECRET_KEY = 'django-insecure-lz=gy%j9t%e(56p#%zg(-pi^(*6$6dqv299rg19liw=ynpof-i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -50,7 +50,6 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "hooslist.herokuapp.com"]
 # code: code written in python and html
 # url: https://www.section.io/engineering-education/django-google-oauth/
 INSTALLED_APPS = [
-    'whitenoise.runserver_nostatic',
     'homepage.apps.HomepageConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -135,7 +134,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SITE_ID = 4
+SITE_ID = 5
 
 LOGOUT_REDIRECT_URL = '/'
 
