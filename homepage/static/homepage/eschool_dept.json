@@ -1,0 +1,42 @@
+[
+  {
+    "full_name": "Applied Mathematics",
+    "abbreviation": "APMA"
+  },
+  {
+    "full_name": "Electrical & Computer Engineering",
+    "abbreviation": "ECE"
+  },
+    {
+    "full_name": "Biomedical Engineering",
+    "abbreviation": "BIOM"
+  },
+    {
+    "full_name": "Materials Science & Engineering",
+    "abbreviation": "MSE"
+  },
+    {
+    "full_name": "Chemical Engineering",
+    "abbreviation": "CHE"
+  },
+    {
+    "full_name": "Mechanical & Aerospace Engineering",
+    "abbreviation": "MAE"
+  },
+    {
+    "full_name": "Engineering Systems and Environment",
+    "abbreviation": "ESE"
+  },
+    {
+    "full_name": "Science, Technology & Society",
+    "abbreviation": "STS"
+  },
+    {
+    "full_name": "Computer Science",
+    "abbreviation": "CS"
+  },
+    {
+    "full_name": "Cross-Disciplinary Courses",
+    "abbreviation": "ENGRD"
+  }
+]

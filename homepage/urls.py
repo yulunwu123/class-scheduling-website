@@ -1,5 +1,4 @@
 from django.urls import path, reverse_lazy
-
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LogoutView, PasswordChangeView, \
@@ -13,7 +12,9 @@ app_name = 'homepage'
 urlpatterns = [
     # ex: /(because included in hooslist/urls.py) or /homepage
     path('', views.index, name='home'),
-    path('department/<str:department>', views.department, name='department'),
+    path('department/<str:department>', views.department,
+         name='department'),
+    path('school/<str:school>', views.school, name='school'),
     path('search', views.search, name='search'),
     path('searchfriend', views.searchfriend, name='searchfriend'),
     path('dashboard', views.dashboard, name='dashboard'),
