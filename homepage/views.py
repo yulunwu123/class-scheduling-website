@@ -1,110 +1,112 @@
 import json
-
-from allauth.account.forms import UserForm
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+import re
 from datetime import datetime, date
-from django.utils.safestring import mark_safe
+from time import strptime
+import ast
+
 import requests
+from allauth.account.forms import UserForm
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
+from django.urls import reverse
+
 from .forms import LoginForm, UserRegistrationForm, UserEditForm, CommentForm, ProfileForm
 from .models import Profile, FriendRequest, Friend, CourseModel, Event, Comment
-from django.contrib import messages
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.models import User
-import re
-from time import strptime
 from .utils import WeeklyTimeTable
-from django.http import HttpResponseRedirect
 
 
 # landing page that displays all departments
 def index(request):
     columns = 2
-    result = []
-    full_name_abbreviation_dict = {}
-    with open('homepage/static/arts_sciences_depts.json') as data_file:
-        arts_and_sciences_depts = json.load(data_file)
-        for x in range(0, len(arts_and_sciences_depts) - 1, columns):
-            row = []
-            for i in range(x, x + columns):
-                row.append(arts_and_sciences_depts[i]["full_name"])
-                full_name_abbreviation_dict[arts_and_sciences_depts[i]["full_name"]] = \
-                    arts_and_sciences_depts[i]["abbreviation"]
-            result.append(row)
-        if len(arts_and_sciences_depts) % columns != 0:
-            rest = len(arts_and_sciences_depts) % columns
-            for j in range(len(arts_and_sciences_depts) - rest, len(arts_and_sciences_depts)):
-                row = [arts_and_sciences_depts[j]["full_name"]]
-                full_name_abbreviation_dict[arts_and_sciences_depts[i]["full_name"]] = \
-                    arts_and_sciences_depts[i]["abbreviation"]
-            result.append(row)
+    result_a_and_s, dict_a_and_s = read_dept_json('arts_sciences_depts.json', columns)
+    result_e_school, dict_e_school = read_dept_json('eschool_dept.json', columns)
+    result_edu_school, dict_edu_school = read_dept_json('education_school_dept.json', columns)
+    result_a_school, dict_a_school = read_dept_json('a_school_dept.json', columns)
+    result_batten_school, dict_batten_school = read_dept_json('batten_school.json', columns)
+    return render(request, 'homepage/index.html', {'response': result_a_and_s,
+                                                   'full_name_abbreviation_dict': dict_a_and_s,
+                                                   'result_e_school': result_e_school,
+                                                   'dict_e_school': dict_e_school,
+                                                   'result_edu_school': result_edu_school,
+                                                   'dict_edu_school': dict_edu_school,
+                                                   'result_a_school': result_a_school,
+                                                   'dict_a_school': dict_a_school,
+                                                   'result_batten_school': result_batten_school,
+                                                   'dict_batten_school': dict_batten_school
+                                                   })
 
-    return render(request, 'homepage/index.html', {'response': result,
-                                                   'full_name_abbreviation_dict': full_name_abbreviation_dict})
+
+# reads in json file to get departments (full and abbreviation) in a certain school
+def read_dept_json(school, col):
+    with open(f'homepage/static/homepage/{school}') as data_file:
+        name_abbreviation_dict = {}
+        result_list, depts = [], json.load(data_file)
+        for x in range(0, len(depts) - 1, col):
+            row = []
+            for i in range(x, x + col):
+                row.append(depts[i]["full_name"])
+                name_abbreviation_dict[depts[i]["full_name"]] = depts[i]["abbreviation"]
+            result_list.append(row)
+        if len(depts) % col != 0:
+            rest = len(depts) % col
+            for j in range(len(depts) - rest, len(depts)):
+                row = [depts[j]["full_name"]]
+                name_abbreviation_dict[depts[i]["full_name"]] = depts[i]["abbreviation"]
+            result_list.append(row)
+    return result_list, name_abbreviation_dict
 
 
 # each department search
 def department(request, department):
-    response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                            f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={department}").json()
-    # changes the data so that all labs and lectures of the same class belong together
-    modified_dict = {}
-    # list of all classes' names
-    class_names_list = []
-    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
-    all_classes = {}
-    for each in response:
-        class_name = department + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
-        meeting_day = ""  # used only when the class has 1 "meetings" element
-        time = ""
-        location = ""  # used only when the class has 1 "meetings" element
-        start_time_struct = ""  # for classes with 1 meeting element
-        end_time_struct = ""  # for classes with 1 meeting element
-        start_time_structs = ""  # for classes with > 1 meeting element
-        end_time_structs = ""  # for classes with > 1 meeting element
-        locations = ""  # same as above
-        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
-        each['more_than_one_meeting'] = False
-        if len(each["meetings"]) > 0:
-            for meeting in each["meetings"]:
-                meeting_day = meeting["days"]
-                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
-                location = meeting["facility_descr"]
-                start_time_structs += meeting["start_time"] + ";"
-                end_time_structs += meeting["end_time"] + ";"
-                meeting["time"] = time
-                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
-                start_time_struct = meeting["start_time"]
-                end_time_struct = meeting["end_time"]
-                locations += location + ";"
-            if len(each["meetings"]) > 1:
-                each['more_than_one_meeting'] = True
-        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
-        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
-        each["location"] = location  # same as above
-        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
-        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
-        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
-        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
-        locations = locations.strip(";")
-        each["locations"] = locations
-        # meeting's for-loop in html
+    department_full_name = request.GET['department_full_name']  # e.g. Mathematics instead of MATH
+    response, page, expected_index = [], 1, 0
+    while True:  # get all pages of JSON, until blank page is reached
+        try:
+            if department.startswith('LPP'):
+                response.extend(
+                    requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={department}&page={page}").json())
+            else:
+                response.extend(
+                    requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&ACAD_ORG={department}&page={page}").json())
+            response[expected_index]
+            page += 1
+            expected_index = 99 * (page - 1)
+        except IndexError:
+            break
 
-        each["instructor"] = "-"
-        if len(each["instructors"]) > 0:
-            each["instructor"] = each["instructors"][0]["name"]
-            each["email"] = each["instructors"][0]["email"]
-
-        if class_name in class_names_list:
-            modified_dict[class_name].append(each)
-        else:
-            class_names_list.append(class_name)
-            modified_dict[class_name] = [each]
-            all_classes[class_name] = each["descr"]
+    modified_dict, all_classes, class_names_list = process_all_classes_info(response)
     return render(request, 'homepage/department.html',
                   {'modified_dict': modified_dict, 'all_classes': all_classes,
-                   'set_of_classes': class_names_list, 'department': department},
+                   'set_of_classes': class_names_list, 'department': department_full_name},
+                  )
+
+
+def school(request, school):
+    full_name = request.GET['full_name']
+    response, page, expected_index = [], 1, 0
+    while True:  # get all pages of JSON, until blank page is reached
+        try:
+            response.extend(
+                requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                             f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&acad_group={school}&page={page}").json())
+            response[expected_index]
+            page += 1
+            expected_index = 99 * (page - 1)
+        except IndexError:
+            break
+
+    modified_dict, all_classes, class_names_list = process_all_classes_info(response)
+    return render(request, 'homepage/department.html',
+                  {'modified_dict': modified_dict, 'all_classes': all_classes,
+                   'set_of_classes': class_names_list, 'department': full_name},
                   )
 
 
@@ -121,7 +123,27 @@ def search(request):
         name = request.POST['name'].replace(' ', '')
         # instructor = request.POST['instructor'].replace(' ', '')
         if dept_name in departments and not number and not name:
-            return department(request, dept_name)
+            with open('homepage/static/homepage/dept_dictionary.txt', 'r') as filehandler:
+                content = filehandler.read()
+                dictionary = ast.literal_eval(content)
+            full_name = dictionary[dept_name]
+            response, page, expected_index = [], 1, 0
+            while True:  # get all pages of JSON, until blank page is reached
+                try:
+                    response.extend(
+                        requests.get(
+                            "https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                            f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={dept_name}&page={page}").json())
+                    response[expected_index]
+                    page += 1
+                    expected_index = 99 * (page - 1)
+                except IndexError:
+                    break
+            modified_dict, all_classes, class_names_list = process_all_classes_info(response)
+            return render(request, 'homepage/department.html',
+                          {'modified_dict': modified_dict, 'all_classes': all_classes,
+                           'set_of_classes': class_names_list, 'department': full_name},
+                          )
         if dept_name in departments and number:
             response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
                                     f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={dept_name}").json()
@@ -183,6 +205,64 @@ def search(request):
             return render(request, 'homepage/search.html', {})
     else:
         return render(request, 'homepage/search.html', {})
+
+
+# a general function to process class information from search
+# displays all classes
+def process_all_classes_info(raw_response):
+    # changes the data so that all labs and lectures of the same class belong together
+    modified_dict = {}
+    # list of all classes' names
+    class_names_list = []
+    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
+    all_classes = {}
+    for each in raw_response:
+        class_name = each["subject"] + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
+        meeting_day = ""  # used only when the class has 1 "meetings" element
+        time = ""
+        # used only when the class has 1 "meetings" element
+        location, start_time_struct, end_time_struct = "", "", ""
+        # for classes with > 1 meeting element
+        start_time_structs, end_time_structs, locations = "", "", ""
+        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
+        each['more_than_one_meeting'] = False
+        if len(each["meetings"]) > 0:
+            for meeting in each["meetings"]:
+                meeting_day = meeting["days"]
+                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
+                location = meeting["facility_descr"]
+                start_time_structs += meeting["start_time"] + ";"
+                end_time_structs += meeting["end_time"] + ";"
+                meeting["time"] = time
+                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
+                start_time_struct = meeting["start_time"]
+                end_time_struct = meeting["end_time"]
+                locations += location + ";"
+            if len(each["meetings"]) > 1:
+                each['more_than_one_meeting'] = True
+        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
+        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
+        each["location"] = location  # same as above
+        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
+        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
+        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
+        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
+        locations = locations.strip(";")
+        each["locations"] = locations
+        # meeting's for-loop in html
+
+        each["instructor"] = "-"
+        if len(each["instructors"]) > 0:
+            each["instructor"] = each["instructors"][0]["name"]
+            each["email"] = each["instructors"][0]["email"]
+
+        if class_name in class_names_list:
+            modified_dict[class_name].append(each)
+        else:
+            class_names_list.append(class_name)
+            modified_dict[class_name] = [each]
+            all_classes[class_name] = each["descr"]
+    return modified_dict, all_classes, class_names_list
 
 
 def view_schedule(request, userID):

@@ -1,7 +1,10 @@
 # College Course Display and Scheduling Website
 Hoos' list is a stateless website that primarily allows University of Virginia
-students to quickly view classes and build schedules. 
+students to quickly view classes and build schedules. The accordion on the homepage
+displays a list of general categories for users to narrow down their scale of search.
+Categories are for different schools at the University of Virginia.
 ![](img/homepage.png)
+![](img/accordion.png)
 
 ## Features
 #### Without login, users are able to see all class mnemonics/departments on the landing homepage, and clicking on any one of these will take them to a page that has all classes under the subject. 
@@ -27,19 +30,16 @@ students to quickly view classes and build schedules.
 #### The system also prevents time conflicts and prevents signing up for multiple sections of the same course.
 ![](img/time_conflict.png)
 
-#### Logged-in users are able to "friend" other users by searching their username, first name, last name, or their email adress.
-![](img/search_friend.png)
-
-#### Each account's "friends" information is separated into 3 categories as follows
-![](img/friendslist.png)
-#### Once friends, users can see each other's schedule by clicking on their username in the "current friends" column.
-![](img/friendslist2.png)
+#### Logged-in users are able to "friend" other users by searching their username, first name, last name, or their email address.
+Each account's "friends" information is separated into 3 categories.
+Once friends, users can see each other's schedule by clicking on their username in the "current friends" column.
+![](img/friends.png)
 
 ## Miscellaneous
  - Currently, the website only supports class search for spring 2023 semester,
 but can very easily be adapted to add all other past semester as well.
  - Similarly, more search filters could be added in the future. 
- - Last updated date: Mar 19, 2023. 
+ - Last updated date: Apr 10, 2023. 
 
 
 

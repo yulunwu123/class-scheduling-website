@@ -5,17 +5,16 @@
 }
 body {
     background: linear-gradient(
-        130deg,
-        #87CEEB,
-        #FFB6C1 51.07%,
-        #faa5b9 66.05%
+        to right,
+        #DECBA4,
+        #8aabab
     );
 }
 
 .header {
   padding: 40px;
   border-radius: 30px;
-  background: #FE7E9C;
+  background: #deb7a4;
   color: black;
   font-size: 30px;
   font-family: 'Bebas Neue', cursive;

@@ -8,6 +8,8 @@
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous">
 
+
+<!-- Banner -->
 <div class="header">
     <div class="row">
         <div class="col">
@@ -27,44 +29,225 @@
     </div>
 </div>
 <br>
+<!-- Search Filters -->
 <div class="row">
     <form class="form-inline my-2 my-lg-0" method=POST
           action="{% url 'homepage:search' %}">
         {% csrf_token %}
-            <input class="form-control mr-sm-2" type="search"
-                   placeholder="Search Department" name="subject">
-            <input class="form-control mr-sm-2" type="search"
-                   placeholder="Search Number" name="number">
-            <input class="form-control mr-sm-2" type="search"
-                   placeholder="Class Title" name="name">
-            <!--
-            <input class="form-control mr-sm-2" type="search"
-                   placeholder="Instructor Last Name" name="instructor">
-            -->
-            <button class="btn btn-outline-secondary my-2 my-sm-0"
-                    type="submit">Search
-            </button>
+        <input class="form-control mr-sm-2" type="search"
+               placeholder="Search Department" name="subject">
+        <input class="form-control mr-sm-2" type="search"
+               placeholder="Search Number" name="number">
+        <input class="form-control mr-sm-2" type="search"
+               placeholder="Class Title" name="name">
+        <button class="btn btn-outline-danger my-2 my-sm-0"
+                type="submit">Search
+        </button>
     </form>
 
 </div>
-
-
 <br>
-<div class="me-auto" style="max-width: 1200px;">
-    <table class="table table-bordered table-sm">
-        <caption class="caption-top" style="font-family: 'fire'">All Department Mnemonics</caption>
-        {%for row in response%}
-        <tr>
-            {% for cell in row %}
-            <td class="tcell" style="background-color:#FFB6C1">
-                <p class="font-weight-bold">
-                    <a class="text-dark" href="/department/{{full_name_abbreviation_dict|get_item:cell}}">{{cell}}</a>
-            </td>
+
+<!-- An Accordion of Different Schools at the University of Virginia -->
+<div id="accordion">
+    <!-- College of Arts and Sciences -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#art_and_science" role="button"> Arts & Sciences
+                Departments</a>
+        </h4>
+    </div>
+    <div class="collapse show" id="art_and_science" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            {%for row in response%}
+            <tr>
+                {% for cell in row %}
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:department' full_name_abbreviation_dict|get_item:cell%}?department_full_name={{cell}}">
+                        {{cell}}
+                    </a>
+                </td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
+    </div>
+
+    <!-- School of Engineering & Applied Science -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#eschool" role="button">Engineering & Applied
+                Sciences Departments</a>
+        </h4>
+    </div>
+    <div class="collapse" id="eschool" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            {%for row in result_e_school%}
+            <tr>
+                {% for cell in row %}
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="/department/{{dict_e_school|get_item:cell}}?department_full_name={{cell}}">
+                        {{cell}}</a>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- School of Education and Human Development -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#education_school" role="button">
+                School of Education and Human Development Departments</a>
+        </h4>
+    </div>
+    <div class="collapse" id="education_school" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            {%for row in result_edu_school%}
+            <tr>
+                {% for cell in row %}
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:department' dict_edu_school|get_item:cell%}?department_full_name={{cell}}">
+                        {{cell}}
+                    </a>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- School of Architecture -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#arch_school" role="button">
+                School of Architecture</a>
+        </h4>
+    </div>
+    <div class="collapse" id="arch_school" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            {%for row in result_a_school%}
+            <tr>
+                {% for cell in row %}
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:department' dict_a_school|get_item:cell%}?department_full_name={{cell}}">
+                        {{cell}}
+                    </a>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Batten School -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#batten_school" role="button">
+                Frank Batten School of Leadership and Public Policy</a>
+        </h4>
+    </div>
+    <div class="collapse" id="batten_school" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            {%for row in result_batten_school%}
+            <tr>
+                {% for cell in row %}
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:department' dict_batten_school|get_item:cell%}?department_full_name={{cell}}">
+                        {{cell}}
+                    </a>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Schools with 1 Department -->
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a class="btn btn-info btn-lg" data-toggle="collapse" href="#other_schools" role="button">
+                Other Schools at the University of Virginia</a>
+        </h4>
+    </div>
+    <div class="collapse" id="other_schools" data-parent="#accordion">
+        <table class="table table-bordered table-sm">
+            <tr>
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'COMM' %}?full_name=McIntire School of Commerce">
+                        McIntire School of Commerce
+                    </a>
+                </td>
+                <td class="tcell" style="background-color:#FFB6C1">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'SCPS' %}?full_name=School of Continuing and Professional Studies">
+                        School of Continuing and Professional Studies
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td class="tcell" style="background-color:#FFB6C1">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'GBUS' %}?full_name=Darden Grad School of Business">
+                        Darden Grad School of Business
+                    </a>
+                </td>
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'PROV' %}?full_name=Executive VP and Provost">
+                        Executive VP and Provost
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td class="tcell" style="background-color:#FFB6C1">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'LAW' %}?full_name=School of Law">
+                        School of Law
+                    </a>
+                </td>
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'DSCI' %}?full_name=School of Data Science">
+                        School of Data Science
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td class="tcell" style="background-color:#FFB6C1">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'MED' %}?full_name=School of Medicine">
+                        School of Medicine
+                    </a>
+                </td>
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'MDS' %}?full_name=Medical School - BIMS/PHS">
+                        Medical School - BIMS/PHS
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td class="tcell" style="background-color:#deb7a4">
+                    <a class="text-dark"
+                       href="{% url 'homepage:school' 'NURS' %}?full_name=School of Nursing">
+                        School of Nursing
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
 </div>
+<div class="spacefill"></div>
 
 
 {% endblock %}
