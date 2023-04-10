@@ -2,6 +2,7 @@ import json
 import re
 from datetime import datetime, date
 from time import strptime
+import ast
 
 import requests
 from allauth.account.forms import UserForm
@@ -13,6 +14,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
+from django.urls import reverse
 
 from .forms import LoginForm, UserRegistrationForm, UserEditForm, CommentForm, ProfileForm
 from .models import Profile, FriendRequest, Friend, CourseModel, Event, Comment
@@ -69,69 +71,18 @@ def department(request, department):
             if department.startswith('LPP'):
                 response.extend(
                     requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1238&subject={department}&page={page}").json())
+                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={department}&page={page}").json())
             else:
                 response.extend(
                     requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1238&ACAD_ORG={department}&page={page}").json())
+                                 f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&ACAD_ORG={department}&page={page}").json())
             response[expected_index]
             page += 1
             expected_index = 99 * (page - 1)
         except IndexError:
             break
 
-    # changes the data so that all labs and lectures of the same class belong together
-    modified_dict = {}
-    # list of all classes' names
-    class_names_list = []
-    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
-    all_classes = {}
-    for each in response:
-        class_name = each["subject"] + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
-        meeting_day = ""  # used only when the class has 1 "meetings" element
-        time = ""
-        # used only when the class has 1 "meetings" element
-        location, start_time_struct, end_time_struct = "", "", ""
-        # for classes with > 1 meeting element
-        start_time_structs, end_time_structs, locations = "", "", ""
-        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
-        each['more_than_one_meeting'] = False
-        if len(each["meetings"]) > 0:
-            for meeting in each["meetings"]:
-                meeting_day = meeting["days"]
-                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
-                location = meeting["facility_descr"]
-                start_time_structs += meeting["start_time"] + ";"
-                end_time_structs += meeting["end_time"] + ";"
-                meeting["time"] = time
-                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
-                start_time_struct = meeting["start_time"]
-                end_time_struct = meeting["end_time"]
-                locations += location + ";"
-            if len(each["meetings"]) > 1:
-                each['more_than_one_meeting'] = True
-        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
-        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
-        each["location"] = location  # same as above
-        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
-        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
-        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
-        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
-        locations = locations.strip(";")
-        each["locations"] = locations
-        # meeting's for-loop in html
-
-        each["instructor"] = "-"
-        if len(each["instructors"]) > 0:
-            each["instructor"] = each["instructors"][0]["name"]
-            each["email"] = each["instructors"][0]["email"]
-
-        if class_name in class_names_list:
-            modified_dict[class_name].append(each)
-        else:
-            class_names_list.append(class_name)
-            modified_dict[class_name] = [each]
-            all_classes[class_name] = each["descr"]
+    modified_dict, all_classes, class_names_list = process_all_classes_info(response)
     return render(request, 'homepage/department.html',
                   {'modified_dict': modified_dict, 'all_classes': all_classes,
                    'set_of_classes': class_names_list, 'department': department_full_name},
@@ -145,65 +96,14 @@ def school(request, school):
         try:
             response.extend(
                 requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
-                             f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1238&acad_group={school}&page={page}").json())
+                             f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&acad_group={school}&page={page}").json())
             response[expected_index]
             page += 1
             expected_index = 99 * (page - 1)
         except IndexError:
             break
 
-    # changes the data so that all labs and lectures of the same class belong together
-    modified_dict = {}
-    # list of all classes' names
-    class_names_list = []
-    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
-    all_classes = {}
-    for each in response:
-        class_name = each["subject"] + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
-        meeting_day = ""  # used only when the class has 1 "meetings" element
-        time = ""
-        # used only when the class has 1 "meetings" element
-        location, start_time_struct, end_time_struct = "", "", ""
-        # for classes with > 1 meeting element
-        start_time_structs, end_time_structs, locations = "", "", ""
-        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
-        each['more_than_one_meeting'] = False
-        if len(each["meetings"]) > 0:
-            for meeting in each["meetings"]:
-                meeting_day = meeting["days"]
-                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
-                location = meeting["facility_descr"]
-                start_time_structs += meeting["start_time"] + ";"
-                end_time_structs += meeting["end_time"] + ";"
-                meeting["time"] = time
-                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
-                start_time_struct = meeting["start_time"]
-                end_time_struct = meeting["end_time"]
-                locations += location + ";"
-            if len(each["meetings"]) > 1:
-                each['more_than_one_meeting'] = True
-        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
-        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
-        each["location"] = location  # same as above
-        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
-        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
-        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
-        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
-        locations = locations.strip(";")
-        each["locations"] = locations
-        # meeting's for-loop in html
-
-        each["instructor"] = "-"
-        if len(each["instructors"]) > 0:
-            each["instructor"] = each["instructors"][0]["name"]
-            each["email"] = each["instructors"][0]["email"]
-
-        if class_name in class_names_list:
-            modified_dict[class_name].append(each)
-        else:
-            class_names_list.append(class_name)
-            modified_dict[class_name] = [each]
-            all_classes[class_name] = each["descr"]
+    modified_dict, all_classes, class_names_list = process_all_classes_info(response)
     return render(request, 'homepage/department.html',
                   {'modified_dict': modified_dict, 'all_classes': all_classes,
                    'set_of_classes': class_names_list, 'department': full_name},
@@ -223,7 +123,27 @@ def search(request):
         name = request.POST['name'].replace(' ', '')
         # instructor = request.POST['instructor'].replace(' ', '')
         if dept_name in departments and not number and not name:
-            return department(request, dept_name)
+            with open('homepage/static/homepage/dept_dictionary.txt', 'r') as filehandler:
+                content = filehandler.read()
+                dictionary = ast.literal_eval(content)
+            full_name = dictionary[dept_name]
+            response, page, expected_index = [], 1, 0
+            while True:  # get all pages of JSON, until blank page is reached
+                try:
+                    response.extend(
+                        requests.get(
+                            "https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
+                            f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={dept_name}&page={page}").json())
+                    response[expected_index]
+                    page += 1
+                    expected_index = 99 * (page - 1)
+                except IndexError:
+                    break
+            modified_dict, all_classes, class_names_list = process_all_classes_info(response)
+            return render(request, 'homepage/department.html',
+                          {'modified_dict': modified_dict, 'all_classes': all_classes,
+                           'set_of_classes': class_names_list, 'department': full_name},
+                          )
         if dept_name in departments and number:
             response = requests.get("https://sisuva.admin.virginia.edu/psc/ihprd/UVSS/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH"
                                     f".FieldFormula.IScript_ClassSearch?institution=UVA01&term=1232&subject={dept_name}").json()
@@ -285,6 +205,64 @@ def search(request):
             return render(request, 'homepage/search.html', {})
     else:
         return render(request, 'homepage/search.html', {})
+
+
+# a general function to process class information from search
+# displays all classes
+def process_all_classes_info(raw_response):
+    # changes the data so that all labs and lectures of the same class belong together
+    modified_dict = {}
+    # list of all classes' names
+    class_names_list = []
+    # all non-duplicated classes with subject, catalog_number, description, and subject+catalog_number (e.g. CS1110)
+    all_classes = {}
+    for each in raw_response:
+        class_name = each["subject"] + " " + each["catalog_nbr"]  # e.g. CS 1110, thus can be duplicated
+        meeting_day = ""  # used only when the class has 1 "meetings" element
+        time = ""
+        # used only when the class has 1 "meetings" element
+        location, start_time_struct, end_time_struct = "", "", ""
+        # for classes with > 1 meeting element
+        start_time_structs, end_time_structs, locations = "", "", ""
+        each["meeting_day_and_time"] = ""  # used when the class has >1 meetings elements
+        each['more_than_one_meeting'] = False
+        if len(each["meetings"]) > 0:
+            for meeting in each["meetings"]:
+                meeting_day = meeting["days"]
+                time = toFormat(meeting["start_time"]) + " - " + toFormat(meeting["end_time"])
+                location = meeting["facility_descr"]
+                start_time_structs += meeting["start_time"] + ";"
+                end_time_structs += meeting["end_time"] + ";"
+                meeting["time"] = time
+                each["meeting_day_and_time"] += meeting_day + ": " + time + ";"  # like "Mo: time;TuTh: time"
+                start_time_struct = meeting["start_time"]
+                end_time_struct = meeting["end_time"]
+                locations += location + ";"
+            if len(each["meetings"]) > 1:
+                each['more_than_one_meeting'] = True
+        each["meeting_day"] = meeting_day  # for classes with 1 meeting element
+        each["meeting_time"] = time  # similar to ⬆️; these two key-value pairs are set for EACH bc form is outside
+        each["location"] = location  # same as above
+        each["start_time_struct"] = start_time_struct  # for classes with 1 meeting element
+        each["end_time_struct"] = end_time_struct  # for classes with 1 meeting element
+        each["start_time_structs"] = start_time_structs  # for classes with > 1 meeting element
+        each["end_time_structs"] = end_time_structs  # for classes with > 1 meeting element
+        locations = locations.strip(";")
+        each["locations"] = locations
+        # meeting's for-loop in html
+
+        each["instructor"] = "-"
+        if len(each["instructors"]) > 0:
+            each["instructor"] = each["instructors"][0]["name"]
+            each["email"] = each["instructors"][0]["email"]
+
+        if class_name in class_names_list:
+            modified_dict[class_name].append(each)
+        else:
+            class_names_list.append(class_name)
+            modified_dict[class_name] = [each]
+            all_classes[class_name] = each["descr"]
+    return modified_dict, all_classes, class_names_list
 
 
 def view_schedule(request, userID):

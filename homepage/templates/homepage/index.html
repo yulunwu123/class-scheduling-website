@@ -40,7 +40,7 @@
                placeholder="Search Number" name="number">
         <input class="form-control mr-sm-2" type="search"
                placeholder="Class Title" name="name">
-        <button class="btn btn-outline-secondary my-2 my-sm-0"
+        <button class="btn btn-outline-danger my-2 my-sm-0"
                 type="submit">Search
         </button>
     </form>
@@ -62,7 +62,7 @@
             {%for row in response%}
             <tr>
                 {% for cell in row %}
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:department' full_name_abbreviation_dict|get_item:cell%}?department_full_name={{cell}}">
                         {{cell}}
@@ -86,7 +86,7 @@
             {%for row in result_e_school%}
             <tr>
                 {% for cell in row %}
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="/department/{{dict_e_school|get_item:cell}}?department_full_name={{cell}}">
                         {{cell}}</a>
@@ -109,7 +109,7 @@
             {%for row in result_edu_school%}
             <tr>
                 {% for cell in row %}
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:department' dict_edu_school|get_item:cell%}?department_full_name={{cell}}">
                         {{cell}}
@@ -133,7 +133,7 @@
             {%for row in result_a_school%}
             <tr>
                 {% for cell in row %}
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:department' dict_a_school|get_item:cell%}?department_full_name={{cell}}">
                         {{cell}}
@@ -157,7 +157,7 @@
             {%for row in result_batten_school%}
             <tr>
                 {% for cell in row %}
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:department' dict_batten_school|get_item:cell%}?department_full_name={{cell}}">
                         {{cell}}
@@ -179,7 +179,7 @@
     <div class="collapse" id="other_schools" data-parent="#accordion">
         <table class="table table-bordered table-sm">
             <tr>
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:school' 'COMM' %}?full_name=McIntire School of Commerce">
                         McIntire School of Commerce
@@ -199,7 +199,7 @@
                         Darden Grad School of Business
                     </a>
                 </td>
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:school' 'PROV' %}?full_name=Executive VP and Provost">
                         Executive VP and Provost
@@ -213,7 +213,7 @@
                         School of Law
                     </a>
                 </td>
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:school' 'DSCI' %}?full_name=School of Data Science">
                         School of Data Science
@@ -227,15 +227,15 @@
                         School of Medicine
                     </a>
                 </td>
-                <td class="tcell" style="background-color:#FFB6C1">
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:school' 'MDS' %}?full_name=Medical School - BIMS/PHS">
                         Medical School - BIMS/PHS
                     </a>
                 </td>
             </tr>
-                        <tr>
-                <td class="tcell" style="background-color:#FFB6C1">
+            <tr>
+                <td class="tcell" style="background-color:#deb7a4">
                     <a class="text-dark"
                        href="{% url 'homepage:school' 'NURS' %}?full_name=School of Nursing">
                         School of Nursing
